@@ -1,5 +1,7 @@
 package main
 
+import "errors"
+
 type parser struct{}
 
 func createParser() (*parser, error) {
@@ -10,5 +12,6 @@ func createParser() (*parser, error) {
 type parsedObject struct{}
 
 func (p *parser) parseStructogram(s string) (*parsedObject, error) {
-	return &parsedObject{}, nil
+	err := errors.New("Parsing error, structogram string is empty!")
+	return &parsedObject{}, err
 }

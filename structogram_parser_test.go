@@ -8,17 +8,17 @@ func checkOk(t *testing.T, err error) {
 	}
 }
 
-func TestCanCreateParser(t *testing.T) {
-	parser, err := createParser()
-	checkOk(t, err)
-	_ = parser
-}
-
-func TestCanCallParseStructogram(t *testing.T) {
+func TestParsingEmptyStringCausesError(t *testing.T) {
 	parser, err := createParser()
 	checkOk(t, err)
 
 	diagram, err := parser.parseStructogram("")
-	checkOk(t, err)
 	_ = diagram
+	if err == nil {
+		t.Errorf("Expected error but was nil")
+	}
+	expectedMsg := "Parsing error, structogram string is empty!"
+	if err.Error() != expectedMsg {
+		t.Errorf("Expected error with msg %s, but got %s", expectedMsg, err.Error())
+	}
 }
