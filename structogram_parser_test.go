@@ -2,23 +2,23 @@ package main
 
 import "testing"
 
-func TestCanCreateParser(t *testing.T) {
-	parser, err := createParser()
+func checkOk(t *testing.T, err error) {
 	if err != nil {
 		t.Errorf("Did not expect any errors")
 	}
+}
+
+func TestCanCreateParser(t *testing.T) {
+	parser, err := createParser()
+	checkOk(t, err)
 	_ = parser
 }
 
 func TestCanCallParseStructogram(t *testing.T) {
 	parser, err := createParser()
-	if err != nil {
-		t.Errorf("Did not expect any errors")
-	}
+	checkOk(t, err)
 
 	diagram, err := parser.parseStructogram("")
-	if err != nil {
-		t.Errorf("Did not expect any errors")
-	}
+	checkOk(t, err)
 	_ = diagram
 }
