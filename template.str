@@ -1,0 +1,19 @@
+// this is a comment
+
+name(this is the name of the structogram)
+
+// any instruction, just text, can be anything
+inst(x = 1)
+
+call(function name)
+
+if (condition) {do something if true} else {do something if false}
+// if statements can be nested
+if (condition1) {if (condition2) {true1} {false1}} else {false}
+
+while (condition) do {thing}
+do{thing} while (condition}
+// loops can also be nested
+while(condition) do {while (condition1) do {thing1}}
+
+switch(condition) {case:effect} {case1:effect} {case2:effect} {case3:effect}
