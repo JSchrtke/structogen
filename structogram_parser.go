@@ -1,17 +1,26 @@
 package main
 
-import "errors"
+import (
+	"errors"
+	"strings"
+)
 
-type parser struct{}
-
-func createParser() (*parser, error) {
-	p := parser{}
-	return &p, nil
+type Structogram struct {
+	name string
 }
 
-type parsedObject struct{}
+func parseStructogram(structogram string) (*Structogram, error) {
+	if len(structogram) == 0 {
+		return nil, errors.New("Parsing error, structogram string is empty!")
+	}
 
-func (p *parser) parseStructogram(s string) (*parsedObject, error) {
-	err := errors.New("Parsing error, structogram string is empty!")
-	return &parsedObject{}, err
+	parsed := Structogram{}
+	nameToken := "name("
+	if strings.Contains(structogram, nameToken) {
+		nameTokenStart := strings.Index(structogram, nameToken)
+		nameTokenEnd := strings.Index(structogram[nameTokenStart:], ")")
+		parsed.name = structogram[nameTokenStart+len(nameToken) : nameTokenEnd]
+	}
+
+	return &parsed, nil
 }

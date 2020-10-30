@@ -9,16 +9,26 @@ func checkOk(t *testing.T, err error) {
 }
 
 func TestParsingEmptyStringCausesError(t *testing.T) {
-	parser, err := createParser()
-	checkOk(t, err)
-
-	diagram, err := parser.parseStructogram("")
-	_ = diagram
+	structogram, err := parseStructogram("")
+	_ = structogram
 	if err == nil {
 		t.Errorf("Expected error but was nil")
 	}
 	expectedMsg := "Parsing error, structogram string is empty!"
 	if err.Error() != expectedMsg {
 		t.Errorf("Expected error with msg %s, but got %s", expectedMsg, err.Error())
+	}
+}
+
+func TestStructogramsHaveNames(t *testing.T) {
+	expectedName := "test name"
+	structogram, err := parseStructogram("name(" + expectedName + ")")
+	checkOk(t, err)
+
+	if structogram.name != expectedName {
+		t.Errorf(
+			"Diagram has wrong name, expected: %s, but was: %s",
+			expectedName, structogram.name,
+		)
 	}
 }
