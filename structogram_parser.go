@@ -40,9 +40,13 @@ func parseStructogram(structogram string) (*Structogram, error) {
 
 	instructionToken := "instruction("
 	if strings.Contains(structogram, instructionToken) {
+		instruction := parseToken(structogram, instructionToken, ")")
+		if len(instruction) == 0 {
+			return nil, errors.New("Instructions can not be empty!")
+		}
 		parsed.instructions = append(
 			parsed.instructions,
-			parseToken(structogram, instructionToken, ")"),
+			instruction,
 		)
 	}
 
