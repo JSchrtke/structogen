@@ -8,40 +8,31 @@ func checkOk(t *testing.T, err error) {
 	}
 }
 
-func TestParsingEmptyStringCausesError(t *testing.T) {
-	structogram, err := parseStructogram("")
-	_ = structogram
+func checkErrorMsg(t *testing.T, err error, expectedMsg string) {
 	if err == nil {
 		t.Errorf("Expected error but was nil")
 	}
-	expectedMsg := "Parsing error, structogram string is empty!"
 	if err.Error() != expectedMsg {
 		t.Errorf("Expected error with msg %s, but got %s", expectedMsg, err.Error())
 	}
+}
+
+func TestParsingEmptyStringCausesError(t *testing.T) {
+	structogram, err := parseStructogram("")
+	_ = structogram
+	checkErrorMsg(t, err, "Parsing error, structogram string is empty!")
 }
 
 func TestStructogramHasToHaveAName(t *testing.T) {
 	structogram, err := parseStructogram("has no name token")
 	_ = structogram
-	if err == nil {
-		t.Errorf("Expected error but was nil")
-	}
-	expectedMsg := "Structogram must have a name!"
-	if err.Error() != expectedMsg {
-		t.Errorf("Expected error with msg %s, but got %s", expectedMsg, err.Error())
-	}
+	checkErrorMsg(t, err, "Structogram must have a name!")
 }
 
 func TestEmptyStructogramNameCausesError(t *testing.T) {
 	structogram, err := parseStructogram("name()")
 	_ = structogram
-	if err == nil {
-		t.Errorf("Expected error but was nil")
-	}
-	expectedMsg := "Structograms can not have empty names!"
-	if err.Error() != expectedMsg {
-		t.Errorf("Expected error with msg %s, but got %s", expectedMsg, err.Error())
-	}
+	checkErrorMsg(t, err, "Structograms can not have empty names!")
 }
 
 func TestStructogramsHaveNames(t *testing.T) {
