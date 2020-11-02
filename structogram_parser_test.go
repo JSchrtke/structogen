@@ -48,6 +48,12 @@ func TestNamesCanNotBeNested(t *testing.T) {
 	checkErrorMsg(t, err, "Structogram names can not be nested!")
 }
 
+func TestInstructionsCanNotBeEmpty(t *testing.T) {
+	structogram, err := parseStructogram("name(test structogram)\ninstruction()")
+	_ = structogram
+	checkErrorMsg(t, err, "Instructions can not be empty!")
+}
+
 func TestStructogramCanHaveInstructions(t *testing.T) {
 	structogram, err := parseStructogram("name(test structogram)\ninstruction(do a thing)")
 	checkOk(t, err)

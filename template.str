@@ -3,7 +3,7 @@
 name(this is the name of the structogram)
 
 // any instruction, just text, can be anything
-inst(x = 1)
+instruction(x = 1)
 
 call(function name)
 
