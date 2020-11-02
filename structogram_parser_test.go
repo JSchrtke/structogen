@@ -17,12 +17,6 @@ func checkErrorMsg(t *testing.T, err error, expectedMsg string) {
 	}
 }
 
-func TestParsingEmptyStringCausesError(t *testing.T) {
-	structogram, err := parseStructogram("")
-	_ = structogram
-	checkErrorMsg(t, err, "Parsing error, structogram string is empty!")
-}
-
 func TestStructogramHasToHaveAName(t *testing.T) {
 	structogram, err := parseStructogram("has no name token")
 	_ = structogram
