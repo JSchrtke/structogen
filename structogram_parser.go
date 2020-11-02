@@ -23,8 +23,13 @@ func parseStructogram(structogram string) (*Structogram, error) {
 	nameTokenStart := strings.Index(structogram, nameToken)
 	nameTokenEnd := strings.Index(structogram[nameTokenStart:], ")")
 	parsed.name = structogram[nameTokenStart+len(nameToken) : nameTokenEnd]
+
 	if len(parsed.name) == 0 {
 		return nil, errors.New("Structograms can not have empty names!")
+	}
+
+	if strings.Contains(parsed.name, nameToken) {
+		return nil, errors.New("Structogram names can not be nested!")
 	}
 
 	return &parsed, nil
