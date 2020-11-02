@@ -14,12 +14,17 @@ func parseStructogram(structogram string) (*Structogram, error) {
 		return nil, errors.New("Parsing error, structogram string is empty!")
 	}
 
-	parsed := Structogram{}
 	nameToken := "name("
-	if strings.Contains(structogram, nameToken) {
-		nameTokenStart := strings.Index(structogram, nameToken)
-		nameTokenEnd := strings.Index(structogram[nameTokenStart:], ")")
-		parsed.name = structogram[nameTokenStart+len(nameToken) : nameTokenEnd]
+	if !strings.Contains(structogram, nameToken) {
+		return nil, errors.New("Structogram must have a name!")
+	}
+
+	parsed := Structogram{}
+	nameTokenStart := strings.Index(structogram, nameToken)
+	nameTokenEnd := strings.Index(structogram[nameTokenStart:], ")")
+	parsed.name = structogram[nameTokenStart+len(nameToken) : nameTokenEnd]
+	if len(parsed.name) == 0 {
+		return nil, errors.New("Structograms can not have empty names!")
 	}
 
 	return &parsed, nil
