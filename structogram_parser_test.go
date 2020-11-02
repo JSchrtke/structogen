@@ -47,3 +47,9 @@ func TestStructogramsHaveNames(t *testing.T) {
 		)
 	}
 }
+
+func TestNamesCanNotBeNested(t *testing.T) {
+	structogram, err := parseStructogram("name(name())")
+	_ = structogram
+	checkErrorMsg(t, err, "Structogram names can not be nested!")
+}
