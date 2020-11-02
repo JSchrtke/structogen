@@ -60,6 +60,14 @@ func TestInstructionsCanNotBeEmpty(t *testing.T) {
 	checkErrorMsg(t, err, "Instructions can not be empty!")
 }
 
+func TestInstuctionsCanNotBeNested(t *testing.T) {
+	structogram, err := parseStructogram(
+		"name(test structogram)\ninstruction(instruction())",
+	)
+	_ = structogram
+	checkErrorMsg(t, err, "Instructions can not be nested!")
+}
+
 func TestStructogramCanHaveInstructions(t *testing.T) {
 	structogram, err := parseStructogram(
 		"name(test structogram)\ninstruction(do a thing)",
