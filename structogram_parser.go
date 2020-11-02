@@ -44,6 +44,9 @@ func parseStructogram(structogram string) (*Structogram, error) {
 		if len(instruction) == 0 {
 			return nil, errors.New("Instructions can not be empty!")
 		}
+		if strings.Contains(instruction, instructionToken) {
+			return nil, errors.New("Instructions can not be nested!")
+		}
 		parsed.instructions = append(
 			parsed.instructions,
 			instruction,
