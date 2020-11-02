@@ -13,7 +13,11 @@ func checkErrorMsg(t *testing.T, err error, expectedMsg string) {
 		t.Errorf("Expected error but was nil")
 	}
 	if err.Error() != expectedMsg {
-		t.Errorf("Expected error with msg %s, but got %s", expectedMsg, err.Error())
+		t.Errorf(
+			"Expected error with msg %s, but got %s",
+			expectedMsg,
+			err.Error(),
+		)
 	}
 }
 
@@ -49,13 +53,17 @@ func TestNamesCanNotBeNested(t *testing.T) {
 }
 
 func TestInstructionsCanNotBeEmpty(t *testing.T) {
-	structogram, err := parseStructogram("name(test structogram)\ninstruction()")
+	structogram, err := parseStructogram(
+		"name(test structogram)\ninstruction()",
+	)
 	_ = structogram
 	checkErrorMsg(t, err, "Instructions can not be empty!")
 }
 
 func TestStructogramCanHaveInstructions(t *testing.T) {
-	structogram, err := parseStructogram("name(test structogram)\ninstruction(do a thing)")
+	structogram, err := parseStructogram(
+		"name(test structogram)\ninstruction(do a thing)",
+	)
 	checkOk(t, err)
 	if structogram.instructions[0] != "do a thing" {
 		t.Errorf("Instruction 0 is wrong, expected: %s, but was: %s",
