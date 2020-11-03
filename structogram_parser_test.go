@@ -79,3 +79,19 @@ func TestStructogramCanHaveInstructions(t *testing.T) {
 		)
 	}
 }
+
+func TestStructogramsCanHaveMultipleInstructions(t *testing.T) {
+	structogram, err := parseStructogram(
+		"name(test structogram)\ninstruction(do a thing)\ninstruction(do another thing)",
+	)
+	checkOk(t, err)
+	if structogram.instructions[0] != "do a thing" {
+		t.Errorf("Instruction 0 is wrong, expected: %s, but was: %s",
+			"do a thing", structogram.instructions[0],
+		)
+	} else if structogram.instructions[1] != "do another thing" {
+		t.Errorf("Instruction 1 is wrong, expected: %s, but was: %s",
+			"do another thing", structogram.instructions[1],
+		)
+	}
+}
