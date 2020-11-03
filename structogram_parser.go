@@ -24,7 +24,7 @@ func parseStructogram(structogram string) (*Structogram, error) {
 	}
 
 	nameToken := "name("
-	if !strings.Contains(structogram, nameToken) {
+	if strings.Index(structogram, nameToken) != 0 {
 		return nil, errors.New("Structogram must have a name!")
 	}
 
