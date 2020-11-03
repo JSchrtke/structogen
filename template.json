@@ -1,0 +1,47 @@
+{
+    "template name": {
+        "while":{
+            "condition": "counter != 0",
+            "true": {
+                "instruction0": "counter = 0",
+                "if": {
+                    "condition": "counter % 2 == 0",
+                    "true": {
+                        "call": "printEven()"
+                    },
+                    "false": {
+                        "call": "printOdd()"
+                    }
+                },
+                "instruction1": "counter++",
+                "dowhile": {
+                    "condition": "counter < 5",
+                    "true": {
+                        "switch": {
+                            "condition": "counter",
+                            "case1": {
+                                "of": "1",
+                                "body": "printOne"
+                            },
+                            "case2": {
+                                "of": "2",
+                                "body": "printTwo"
+                            },
+                            "case3": {
+                                "of": "3",
+                                "body": "Empty"
+                            },
+                            "case4": {
+                                "of": "default",
+                                "body": "printDefault"
+                            }
+                        },
+                        "instruction": "counter++"
+                    },
+                    "false":"Empty"
+                }
+            },
+            "false": "Empty"
+        }
+    }
+}
