@@ -10,10 +10,12 @@ type Structogram struct {
 	instructions []string
 }
 
-func parseToken(s, tokenStart, tokenEnd string) string {
+func parseToken(s, tokenStart, tokenEnd string) (content, remaining string) {
 	tokenStartIndex := strings.Index(s, tokenStart)
 	tokenEndIndex := strings.Index(s[tokenStartIndex:], tokenEnd) + tokenStartIndex
-	return s[tokenStartIndex+len(tokenStart) : tokenEndIndex]
+	content = s[tokenStartIndex+len(tokenStart) : tokenEndIndex]
+	remaining = s[tokenEndIndex:]
+	return
 }
 
 func parseStructogram(structogram string) (*Structogram, error) {
@@ -28,19 +30,20 @@ func parseStructogram(structogram string) (*Structogram, error) {
 
 	parsed := Structogram{}
 
-	parsed.name = parseToken(structogram, nameToken, ")")
+	var remaining string
+	parsed.name, remaining = parseToken(structogram, nameToken, ")")
 
 	if len(parsed.name) == 0 {
 		return nil, errors.New("Structograms can not have empty names!")
 	}
-
 	if strings.Contains(parsed.name, nameToken) {
 		return nil, errors.New("Structogram names can not be nested!")
 	}
 
 	instructionToken := "instruction("
-	if strings.Contains(structogram, instructionToken) {
-		instruction := parseToken(structogram, instructionToken, ")")
+	var instruction string
+	for strings.Contains(remaining, instructionToken) {
+		instruction, remaining = parseToken(remaining, instructionToken, ")")
 		if len(instruction) == 0 {
 			return nil, errors.New("Instructions can not be empty!")
 		}
