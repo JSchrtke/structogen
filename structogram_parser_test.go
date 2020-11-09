@@ -13,14 +13,12 @@ func checkErrorMsg(t *testing.T, err error, expectedMsg string) {
 		t.Errorf("Expected error but was nil")
 	}
 	if err.Error() != expectedMsg {
-		t.Errorf("Expected error with msg %s, but got %s", expectedMsg, err.Error())
+		t.Errorf(
+			"Expected error with msg %s, but got %s",
+			expectedMsg,
+			err.Error(),
+		)
 	}
-}
-
-func TestParsingEmptyStringCausesError(t *testing.T) {
-	structogram, err := parseStructogram("")
-	_ = structogram
-	checkErrorMsg(t, err, "Parsing error, structogram string is empty!")
 }
 
 func TestStructogramHasToHaveAName(t *testing.T) {
@@ -52,4 +50,54 @@ func TestNamesCanNotBeNested(t *testing.T) {
 	structogram, err := parseStructogram("name(name())")
 	_ = structogram
 	checkErrorMsg(t, err, "Structogram names can not be nested!")
+}
+
+func TestNameHasToBeFirstToken(t *testing.T) {
+	structogram, err := parseStructogram("instruction(something)name(a name)")
+	_ = structogram
+	checkErrorMsg(t, err, "Structogram must have a name!")
+}
+
+func TestInstructionsCanNotBeEmpty(t *testing.T) {
+	structogram, err := parseStructogram(
+		"name(test structogram)\ninstruction()",
+	)
+	_ = structogram
+	checkErrorMsg(t, err, "Instructions can not be empty!")
+}
+
+func TestInstuctionsCanNotBeNested(t *testing.T) {
+	structogram, err := parseStructogram(
+		"name(test structogram)\ninstruction(instruction())",
+	)
+	_ = structogram
+	checkErrorMsg(t, err, "Instructions can not be nested!")
+}
+
+func TestStructogramCanHaveInstructions(t *testing.T) {
+	structogram, err := parseStructogram(
+		"name(test structogram)\ninstruction(do a thing)",
+	)
+	checkOk(t, err)
+	if structogram.instructions[0] != "do a thing" {
+		t.Errorf("Instruction 0 is wrong, expected: %s, but was: %s",
+			"do a thing", structogram.instructions[0],
+		)
+	}
+}
+
+func TestStructogramsCanHaveMultipleInstructions(t *testing.T) {
+	structogram, err := parseStructogram(
+		"name(test structogram)\ninstruction(do a thing)\ninstruction(do another thing)",
+	)
+	checkOk(t, err)
+	if structogram.instructions[0] != "do a thing" {
+		t.Errorf("Instruction 0 is wrong, expected: %s, but was: %s",
+			"do a thing", structogram.instructions[0],
+		)
+	} else if structogram.instructions[1] != "do another thing" {
+		t.Errorf("Instruction 1 is wrong, expected: %s, but was: %s",
+			"do another thing", structogram.instructions[1],
+		)
+	}
 }
