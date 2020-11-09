@@ -1,19 +1,25 @@
-// this is a comment
+name(template name)
 
-name(this is the name of the structogram)
+instruction(counter = 0)
 
-// any instruction, just text, can be anything
-instruction(x = 1)
+while (counter != 10) {
+    instruction(print counter)
 
-call(function name)
+    if (counter % 2 == 0) {
+        call(printEven())
+    } else {
+        call(printOdd())
+    }
 
-if (condition) {do something if true} else {do something if false}
-// if statements can be nested
-if (condition1) {if (condition2) {true1} {false1}} else {false}
+    instruction(counter++)
 
-while (condition) do {thing}
-do{thing} while (condition}
-// loops can also be nested
-while(condition) do {while (condition1) do {thing1}}
+    dowhile(counter < 5) {
+        switch(counter)
+            {1:printOne}
+            {2:printTwo}
+            {3:}
+            {default:printDefault}
 
-switch(condition) {case:effect} {case1:effect} {case2:effect} {case3:effect}
+        instruction(counter++)
+    }
+}
