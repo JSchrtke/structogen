@@ -17,6 +17,15 @@ type Structogram struct {
 	instructions []string
 }
 
+// TODO find a better name for this
+type ParsedObject struct {
+	name string
+}
+
+func parseTokens(tokens []Token) (ParsedObject, error) {
+	return ParsedObject{}, errors.New("1:5, missing name")
+}
+
 func parseToken(s, tokenStart, tokenEnd string) (content, remaining string) {
 	tokenStartIndex := strings.Index(s, tokenStart)
 	tokenEndIndex := strings.Index(s[tokenStartIndex:], tokenEnd) + tokenStartIndex
