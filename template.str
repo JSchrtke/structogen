@@ -14,11 +14,12 @@ while ("counter != 10") {
     instruction("counter++")
 
     dowhile("counter < 5") {
-        switch("counter")
+        switch("counter") {
             {1:"printOne"}
             {2:"printTwo"}
             {3:""}
             {default:"printDefault"}
+        }
 
         instruction("counter++")
     }
