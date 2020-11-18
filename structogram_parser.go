@@ -5,6 +5,13 @@ import (
 	"strings"
 )
 
+type Token struct {
+	tokenType string
+	value     string
+	line      int
+	column    int
+}
+
 type Structogram struct {
 	name         string
 	instructions []string
