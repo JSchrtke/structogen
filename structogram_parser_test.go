@@ -55,8 +55,35 @@ func TestEmptyStructogramNameCausesError(t *testing.T) {
 }
 
 func TestStructogramsHaveNames(t *testing.T) {
+	// Represents the string 'name("test name")'
 	expectedName := "test name"
-	structogram, err := parseStructogram("name(" + expectedName + ")")
+	tokens := []Token{
+		{
+			tokenType: "name",
+			value:     "name",
+			line:      1,
+			column:    1,
+		},
+		{
+			tokenType: "openParentheses",
+			value:     "(",
+			line:      1,
+			column:    5,
+		},
+		{
+			tokenType: "string",
+			value:     "test name",
+			line:      1,
+			column:    6,
+		},
+		{
+			tokenType: "closeParentheses",
+			value:     ")",
+			line:      1,
+			column:    0,
+		},
+	}
+	structogram, err := parseTokens(tokens)
 	checkOk(t, err)
 
 	if structogram.name != expectedName {

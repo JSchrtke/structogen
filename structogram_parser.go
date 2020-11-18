@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 )
 
@@ -23,7 +24,22 @@ type ParsedObject struct {
 }
 
 func parseTokens(tokens []Token) (ParsedObject, error) {
-	return ParsedObject{}, errors.New("1:5, missing name")
+	var parsed ParsedObject
+	var err error
+	if tokens[0].tokenType == "name" {
+		// The next token should be a openParentheses
+		if tokens[2].tokenType != "string" {
+			return parsed, errors.New(
+				fmt.Sprintf(
+					"%d:%d, missing name",
+					tokens[1].line,
+					tokens[1].column,
+				),
+			)
+		}
+		parsed.name = tokens[2].value
+	}
+	return parsed, err
 }
 
 func parseToken(s, tokenStart, tokenEnd string) (content, remaining string) {
