@@ -1,25 +1,25 @@
-name(template name)
+name("template name")
 
-instruction(counter = 0)
+instruction("counter = 0")
 
-while (counter != 10) {
-    instruction(print counter)
+while ("counter != 10") {
+    instruction("print counter")
 
-    if (counter % 2 == 0) {
-        call(printEven())
+    if ("counter % 2 == 0") {
+        call("printEven()")
     } else {
-        call(printOdd())
+        call("printOdd()")
     }
 
-    instruction(counter++)
+    instruction("counter++")
 
-    dowhile(counter < 5) {
-        switch(counter)
-            {1:printOne}
-            {2:printTwo}
-            {3:}
-            {default:printDefault}
+    dowhile("counter < 5") {
+        switch("counter")
+            {1:"printOne"}
+            {2:"printTwo"}
+            {3:""}
+            {default:"printDefault"}
 
-        instruction(counter++)
+        instruction("counter++")
     }
 }
