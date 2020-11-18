@@ -22,15 +22,36 @@ func checkErrorMsg(t *testing.T, err error, expectedMsg string) {
 }
 
 func TestStructogramHasToHaveAName(t *testing.T) {
+	// TODO Is this test still needed in this form if we are parsing tokens?
 	structogram, err := parseStructogram("has no name token")
 	_ = structogram
 	checkErrorMsg(t, err, "Structogram must have a name!")
 }
 
 func TestEmptyStructogramNameCausesError(t *testing.T) {
-	structogram, err := parseStructogram("name()")
-	_ = structogram
-	checkErrorMsg(t, err, "Structograms can not have empty names!")
+	// Represents the string 'name()'
+	tokens := []Token{
+		{
+			tokenType: "name",
+			value:     "name",
+			line:      1,
+			column:    1,
+		},
+		{
+			tokenType: "openParentheses",
+			value:     "(",
+			line:      1,
+			column:    5,
+		},
+		{
+			tokenType: "closeParentheses",
+			value:     ")",
+			line:      1,
+			column:    6,
+		},
+	}
+	_, err := parseTokens(tokens)
+	checkErrorMsg(t, err, "1:5, missing name")
 }
 
 func TestStructogramsHaveNames(t *testing.T) {
