@@ -95,9 +95,47 @@ func TestStructogramsHaveNames(t *testing.T) {
 }
 
 func TestNamesCanNotBeNested(t *testing.T) {
-	structogram, err := parseStructogram("name(name())")
-	_ = structogram
-	checkErrorMsg(t, err, "Structogram names can not be nested!")
+	// Represents the string '"name(name())"'
+	tokens := []Token{
+		{
+			tokenType: "name",
+			value:     "name",
+			line:      1,
+			column:    1,
+		},
+		{
+			tokenType: "openParentheses",
+			value:     "(",
+			line:      1,
+			column:    5,
+		},
+		{
+			tokenType: "name",
+			value:     "name",
+			line:      1,
+			column:    6,
+		},
+		{
+			tokenType: "openParentheses",
+			value:     "(",
+			line:      1,
+			column:    11,
+		},
+		{
+			tokenType: "closeParentheses",
+			value:     ")",
+			line:      1,
+			column:    12,
+		},
+		{
+			tokenType: "closeParentheses",
+			value:     ")",
+			line:      1,
+			column:    13,
+		},
+	}
+	_, err := parseTokens(tokens)
+	checkErrorMsg(t, err, "1:6, names can not be nested")
 }
 
 func TestNameHasToBeFirstToken(t *testing.T) {
