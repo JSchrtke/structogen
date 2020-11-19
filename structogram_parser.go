@@ -28,6 +28,15 @@ func parseTokens(tokens []Token) (ParsedObject, error) {
 	var err error
 	if tokens[0].tokenType == "name" {
 		// The next token should be a openParentheses
+		if tokens[2].tokenType == "name" {
+			return parsed, errors.New(
+				fmt.Sprintf(
+					"%d:%d, names can not be nested",
+					tokens[2].line,
+					tokens[2].column,
+				),
+			)
+		}
 		if tokens[2].tokenType != "string" {
 			return parsed, errors.New(
 				fmt.Sprintf(
