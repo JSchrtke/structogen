@@ -139,9 +139,59 @@ func TestNamesCanNotBeNested(t *testing.T) {
 }
 
 func TestNameHasToBeFirstToken(t *testing.T) {
-	structogram, err := parseStructogram("instruction(something)name(a name)")
-	_ = structogram
-	checkErrorMsg(t, err, "Structogram must have a name!")
+	// Represents the string '"instruction("something")name("a name")"'
+	tokens := []Token{
+		{
+			tokenType: "instruction",
+			value:     "instruction",
+			line:      1,
+			column:    1,
+		},
+		{
+			tokenType: "openParentheses",
+			value:     "(",
+			line:      1,
+			column:    12,
+		},
+		{
+			tokenType: "string",
+			value:     "something",
+			line:      1,
+			column:    13,
+		},
+		{
+			tokenType: "closeParentheses",
+			value:     ")",
+			line:      1,
+			column:    24,
+		},
+		{
+			tokenType: "name",
+			value:     "name",
+			line:      1,
+			column:    25,
+		},
+		{
+			tokenType: "openParentheses",
+			value:     "(",
+			line:      1,
+			column:    29,
+		},
+		{
+			tokenType: "string",
+			value:     "a name",
+			line:      1,
+			column:    30,
+		},
+		{
+			tokenType: "closeParentheses",
+			value:     ")",
+			line:      1,
+			column:    38,
+		},
+	}
+	_, err := parseTokens(tokens)
+	checkErrorMsg(t, err, "1:1, structogram has to start with a name")
 }
 
 func TestInstructionsCanNotBeEmpty(t *testing.T) {
