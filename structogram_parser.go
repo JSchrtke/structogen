@@ -47,6 +47,14 @@ func parseTokens(tokens []Token) (ParsedObject, error) {
 			)
 		}
 		parsed.name = tokens[2].value
+	} else {
+		return parsed, errors.New(
+			fmt.Sprintf(
+				"%d:%d, structogram has to start with a name",
+				tokens[0].line,
+				tokens[0].column,
+			),
+		)
 	}
 	return parsed, err
 }
