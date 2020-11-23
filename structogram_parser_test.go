@@ -80,7 +80,7 @@ func TestStructogramsHaveNames(t *testing.T) {
 			tokenType: "closeParentheses",
 			value:     ")",
 			line:      1,
-			column:    0,
+			column:    17,
 		},
 	}
 	structogram, err := parseTokens(tokens)
