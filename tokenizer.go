@@ -17,6 +17,14 @@ func (t *Tokenizer) makeTokens(s string) []Token {
 				column:    i,
 			}
 			tokens = append(tokens, nameToken)
+		case "(":
+			openParethesesToken := Token{
+				tokenType: "openParentheses",
+				value:     "(",
+				line:      lineNumber,
+				column:    i,
+			}
+			tokens = append(tokens, openParethesesToken)
 		}
 	}
 	return tokens
