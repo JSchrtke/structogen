@@ -44,3 +44,10 @@ func TestCanTokenizeOpenParentheses(t *testing.T) {
 	checkTokenCount(t, tokens, 1)
 	checkTokenType(t, tokens[0], "openParentheses")
 }
+
+func TestCanTokenizeCloseParentheses(t *testing.T) {
+	var tokenizer Tokenizer
+	tokens := tokenizer.makeTokens(")")
+	checkTokenCount(t, tokens, 1)
+	checkTokenType(t, tokens[0], "closeParentheses")
+}
