@@ -17,6 +17,7 @@ func (t *Tokenizer) makeTokens(s string) []Token {
 				column:    i,
 			}
 			tokens = append(tokens, nameToken)
+			runes = nil
 		case "(":
 			openParethesesToken := Token{
 				tokenType: "openParentheses",
@@ -25,6 +26,7 @@ func (t *Tokenizer) makeTokens(s string) []Token {
 				column:    i,
 			}
 			tokens = append(tokens, openParethesesToken)
+			runes = nil
 		case ")":
 			openParethesesToken := Token{
 				tokenType: "closeParentheses",
@@ -33,6 +35,7 @@ func (t *Tokenizer) makeTokens(s string) []Token {
 				column:    i,
 			}
 			tokens = append(tokens, openParethesesToken)
+			runes = nil
 		}
 	}
 	return tokens
