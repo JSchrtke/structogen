@@ -60,3 +60,13 @@ func TestCanTokenizeMultipleTokens(t *testing.T) {
 	checkTokenType(t, tokens[1], "openParentheses")
 	checkTokenType(t, tokens[2], "closeParentheses")
 }
+
+func TestCanTokenizeString(t *testing.T) {
+	var tokenizer Tokenizer
+	tokens := tokenizer.makeTokens(`"a test string"`)
+	checkTokenCount(t, tokens, 1)
+	checkTokenType(t, tokens[0], "string")
+	if tokens[0].value != "a test string" {
+		t.Errorf(fmt.Sprintf("Expected token with value 'a test string', but got %s", tokens[0].value))
+	}
+}
