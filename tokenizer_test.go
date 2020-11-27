@@ -70,3 +70,10 @@ func TestCanTokenizeString(t *testing.T) {
 		t.Errorf(fmt.Sprintf("Expected token with value 'a test string', but got %s", tokens[0].value))
 	}
 }
+
+func TestCanTokenizeInstruction(t *testing.T) {
+	var tokenizer Tokenizer
+	tokens := tokenizer.makeTokens("instruction")
+	checkTokenCount(t, tokens, 1)
+	checkTokenType(t, tokens[0], "instruction")
+}

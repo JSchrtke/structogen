@@ -75,6 +75,14 @@ func (t *Tokenizer) makeTokens(s string) []Token {
 				column:    startIdx,
 			}
 			tokens = append(tokens, stringToken)
+		case "instruction":
+			instructionToken := Token{
+				tokenType: "instruction",
+				value:     "",
+				line:      lineNumber,
+				column:    t.runeIndex,
+			}
+			tokens = append(tokens, instructionToken)
 		}
 	}
 	return tokens
