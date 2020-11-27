@@ -18,9 +18,20 @@ func checkTokenType(t *testing.T, token Token, typeString string) {
 	t.Helper()
 	if token.tokenType != typeString {
 		t.Errorf(fmt.Sprintf(
-			"Expected token of type %s, but got %s",
+			"Expected token of type: %s, but got type: %s",
 			typeString,
 			token.tokenType,
+		))
+	}
+}
+
+func checkTokenValue(t *testing.T, token Token, value string) {
+	t.Helper()
+	if token.value != value {
+		t.Errorf(fmt.Sprintf(
+			"Expected token with value: %s, but got value: %s",
+			value,
+			token.value,
 		))
 	}
 }
@@ -52,23 +63,12 @@ func TestCanTokenizeCloseParentheses(t *testing.T) {
 	checkTokenType(t, tokens[0], "closeParentheses")
 }
 
-func TestCanTokenizeMultipleTokens(t *testing.T) {
-	var tokenizer Tokenizer
-	tokens := tokenizer.makeTokens("name()")
-	checkTokenCount(t, tokens, 3)
-	checkTokenType(t, tokens[0], "name")
-	checkTokenType(t, tokens[1], "openParentheses")
-	checkTokenType(t, tokens[2], "closeParentheses")
-}
-
 func TestCanTokenizeString(t *testing.T) {
 	var tokenizer Tokenizer
 	tokens := tokenizer.makeTokens(`"a test string"`)
 	checkTokenCount(t, tokens, 1)
 	checkTokenType(t, tokens[0], "string")
-	if tokens[0].value != "a test string" {
-		t.Errorf(fmt.Sprintf("Expected token with value 'a test string', but got %s", tokens[0].value))
-	}
+	checkTokenValue(t, tokens[0], "a test string")
 }
 
 func TestCanTokenizeInstruction(t *testing.T) {
@@ -76,4 +76,26 @@ func TestCanTokenizeInstruction(t *testing.T) {
 	tokens := tokenizer.makeTokens("instruction")
 	checkTokenCount(t, tokens, 1)
 	checkTokenType(t, tokens[0], "instruction")
+}
+
+func TestCanTokenizeMultipleTokens(t *testing.T) {
+	var tokenizer Tokenizer
+	tokens := tokenizer.makeTokens(`name("a name")instruction("do this")`)
+	checkTokenCount(t, tokens, 8)
+	checkTokenType(t, tokens[0], "name")
+	checkTokenValue(t, tokens[0], "name")
+	checkTokenType(t, tokens[1], "openParentheses")
+	checkTokenValue(t, tokens[1], "(")
+	checkTokenType(t, tokens[2], "string")
+	checkTokenValue(t, tokens[2], "a name")
+	checkTokenType(t, tokens[3], "closeParentheses")
+	checkTokenValue(t, tokens[3], ")")
+	checkTokenType(t, tokens[4], "instruction")
+	checkTokenValue(t, tokens[4], "instruction")
+	checkTokenType(t, tokens[5], "openParentheses")
+	checkTokenValue(t, tokens[5], "(")
+	checkTokenType(t, tokens[6], "string")
+	checkTokenValue(t, tokens[6], "do this")
+	checkTokenType(t, tokens[7], "closeParentheses")
+	checkTokenValue(t, tokens[7], ")")
 }

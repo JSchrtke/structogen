@@ -65,7 +65,10 @@ func (t *Tokenizer) makeTokens(s string) []Token {
 				if string(t.next()) != `"` {
 					str += string(t.readNext())
 				} else {
+					// We don't want the quotation marks in the string, so when
+					// one is found, read and discard it.
 					t.readNext()
+					break
 				}
 			}
 			stringToken := Token{
@@ -75,14 +78,16 @@ func (t *Tokenizer) makeTokens(s string) []Token {
 				column:    startIdx,
 			}
 			tokens = append(tokens, stringToken)
+			runes = nil
 		case "instruction":
 			instructionToken := Token{
 				tokenType: "instruction",
-				value:     "",
+				value:     "instruction",
 				line:      lineNumber,
 				column:    t.runeIndex,
 			}
 			tokens = append(tokens, instructionToken)
+			runes = nil
 		}
 	}
 	return tokens
