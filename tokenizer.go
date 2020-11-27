@@ -88,6 +88,19 @@ func (t *Tokenizer) makeTokens(s string) []Token {
 			}
 			tokens = append(tokens, instructionToken)
 			runes = nil
+		case " ":
+			v := " "
+			for !t.isEof() && (string(t.next()) == " ") {
+				v += string(t.readNext())
+			}
+			whitespaceToken := Token{
+				tokenType: "whitespace",
+				value:     v,
+				line:      lineNumber,
+				column:    t.runeIndex,
+			}
+			tokens = append(tokens, whitespaceToken)
+			runes = nil
 		}
 	}
 	return tokens
