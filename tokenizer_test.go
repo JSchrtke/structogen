@@ -94,6 +94,22 @@ func TestCanTokenizeMultipleSpaces(t *testing.T) {
 	checkTokenValue(t, tokens[0], "  ")
 }
 
+func TestCanTokenizeTabs(t *testing.T) {
+	var tokenizer Tokenizer
+	tokens := tokenizer.makeTokens("\t")
+	checkTokenCount(t, tokens, 1)
+	checkTokenType(t, tokens[0], "whitespace")
+	checkTokenValue(t, tokens[0], "\t")
+}
+
+func TestCanTokenizeMultipleTabs(t *testing.T) {
+	var tokenizer Tokenizer
+	tokens := tokenizer.makeTokens("\t\t")
+	checkTokenCount(t, tokens, 1)
+	checkTokenType(t, tokens[0], "whitespace")
+	checkTokenValue(t, tokens[0], "\t\t")
+}
+
 func TestCanTokenizeMultipleTokens(t *testing.T) {
 	var tokenizer Tokenizer
 	tokens := tokenizer.makeTokens(`name("a name") instruction("do this")`)
