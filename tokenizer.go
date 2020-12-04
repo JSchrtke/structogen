@@ -108,7 +108,10 @@ func (t *Tokenizer) makeTokens(s string) []Token {
 				column:    t.currentColumnNumber,
 			}
 			tokens = append(tokens, stringToken)
-			t.currentColumnNumber += len(str)
+			// While we don't want the quotation marks in the value of the
+			// string, we do have to make sure the column number is still
+			// correct.
+			t.currentColumnNumber += len(str) + 2
 			runes = nil
 		case "instruction":
 			instructionToken := Token{
