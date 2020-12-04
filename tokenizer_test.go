@@ -47,6 +47,28 @@ func checkTokenLineNumber(t *testing.T, token Token, lineNumber int) {
 	}
 }
 
+func checkTokenColumnNumber(t *testing.T, token Token, columnNumber int) {
+	t.Helper()
+	if token.column != columnNumber {
+		t.Errorf(fmt.Sprintf(
+			"Expected token with column number: %d, but got column number: %d",
+			columnNumber,
+			token.column,
+		))
+	}
+}
+
+func checkToken(
+	t *testing.T, token Token, tokenType string,
+	tokenValue string, lineNumber int, columnNumber int,
+) {
+	t.Helper()
+	checkTokenType(t, token, tokenType)
+	checkTokenValue(t, token, tokenValue)
+	checkTokenLineNumber(t, token, lineNumber)
+	checkTokenColumnNumber(t, token, columnNumber)
+}
+
 func TestTokenizingEmptyStringDoesNothing(t *testing.T) {
 	tokenizer := makeTokenizer()
 	tokens := tokenizer.makeTokens("")
@@ -144,6 +166,15 @@ func TestTokenizingNewlineAdvancesLineNumber(t *testing.T) {
 	checkTokenLineNumber(t, tokens[0], 1)
 	checkTokenLineNumber(t, tokens[1], 1)
 	checkTokenLineNumber(t, tokens[2], 2)
+}
+
+func TestColumnNumberResetsAfterEncounteringNewline(t *testing.T) {
+	tokenizer := makeTokenizer()
+	tokens := tokenizer.makeTokens("name\ninstruction")
+	checkTokenCount(t, tokens, 3)
+	checkToken(t, tokens[0], "name", "name", 1, 1)
+	checkToken(t, tokens[1], "whitespace", "\n", 1, 5)
+	checkToken(t, tokens[2], "instruction", "instruction", 2, 1)
 }
 
 func TestCanTokenizeMultipleTokens(t *testing.T) {
