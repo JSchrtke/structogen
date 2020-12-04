@@ -36,6 +36,17 @@ func checkTokenValue(t *testing.T, token Token, value string) {
 	}
 }
 
+func checkTokenLineNumber(t *testing.T, token Token, lineNumber int) {
+	t.Helper()
+	if token.line != lineNumber {
+		t.Errorf(fmt.Sprintf(
+			"Expected token with line number: %d, but got line number: %d",
+			lineNumber,
+			token.line,
+		))
+	}
+}
+
 func TestTokenizingEmptyStringDoesNothing(t *testing.T) {
 	var tokenizer Tokenizer
 	tokens := tokenizer.makeTokens("")
@@ -108,6 +119,31 @@ func TestCanTokenizeMultipleTabs(t *testing.T) {
 	checkTokenCount(t, tokens, 1)
 	checkTokenType(t, tokens[0], "whitespace")
 	checkTokenValue(t, tokens[0], "\t\t")
+}
+
+func TestCanTokenizeNewlines(t *testing.T) {
+	var tokenizer Tokenizer
+	tokens := tokenizer.makeTokens("\n")
+	checkTokenCount(t, tokens, 1)
+	checkTokenType(t, tokens[0], "whitespace")
+	checkTokenValue(t, tokens[0], "\n")
+}
+
+func TestCanTokenizeMultipleNewlines(t *testing.T) {
+	var tokenizer Tokenizer
+	tokens := tokenizer.makeTokens("\n\n")
+	checkTokenCount(t, tokens, 1)
+	checkTokenType(t, tokens[0], "whitespace")
+	checkTokenValue(t, tokens[0], "\n\n")
+}
+
+func TestTokenizingNewlineAdvancesLineNumber(t *testing.T) {
+	var tokenizer Tokenizer
+	tokens := tokenizer.makeTokens("name\ninstruction")
+	checkTokenCount(t, tokens, 3)
+	checkTokenLineNumber(t, tokens[0], 1)
+	checkTokenLineNumber(t, tokens[1], 1)
+	checkTokenLineNumber(t, tokens[2], 2)
 }
 
 func TestCanTokenizeMultipleTokens(t *testing.T) {
