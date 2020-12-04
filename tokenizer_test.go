@@ -79,96 +79,80 @@ func TestCanTokenizeName(t *testing.T) {
 	tokenizer := makeTokenizer()
 	tokens := tokenizer.makeTokens("name")
 	checkTokenCount(t, tokens, 1)
-	checkTokenType(t, tokens[0], "name")
+	checkToken(t, tokens[0], "name", "name", 1, 1)
 }
 
 func TestCanTokenizeOpenParentheses(t *testing.T) {
 	tokenizer := makeTokenizer()
 	tokens := tokenizer.makeTokens("(")
 	checkTokenCount(t, tokens, 1)
-	checkTokenType(t, tokens[0], "openParentheses")
+	checkToken(t, tokens[0], "openParentheses", "(", 1, 1)
 }
 
 func TestCanTokenizeCloseParentheses(t *testing.T) {
 	tokenizer := makeTokenizer()
 	tokens := tokenizer.makeTokens(")")
 	checkTokenCount(t, tokens, 1)
-	checkTokenType(t, tokens[0], "closeParentheses")
+	checkToken(t, tokens[0], "closeParentheses", ")", 1, 1)
 }
 
 func TestCanTokenizeString(t *testing.T) {
 	tokenizer := makeTokenizer()
 	tokens := tokenizer.makeTokens(`"a test string"`)
 	checkTokenCount(t, tokens, 1)
-	checkTokenType(t, tokens[0], "string")
-	checkTokenValue(t, tokens[0], "a test string")
+	checkToken(t, tokens[0], "string", "a test string", 1, 1)
 }
 
 func TestCanTokenizeInstruction(t *testing.T) {
 	tokenizer := makeTokenizer()
 	tokens := tokenizer.makeTokens("instruction")
 	checkTokenCount(t, tokens, 1)
-	checkTokenType(t, tokens[0], "instruction")
+	checkToken(t, tokens[0], "instruction", "instruction", 1, 1)
 }
 
 func TestCanTokenizeSpace(t *testing.T) {
 	tokenizer := makeTokenizer()
 	tokens := tokenizer.makeTokens(" ")
 	checkTokenCount(t, tokens, 1)
-	checkTokenType(t, tokens[0], "whitespace")
-	checkTokenValue(t, tokens[0], " ")
+	checkToken(t, tokens[0], "whitespace", " ", 1, 1)
 }
 
 func TestCanTokenizeMultipleSpaces(t *testing.T) {
 	tokenizer := makeTokenizer()
 	tokens := tokenizer.makeTokens("  ")
 	checkTokenCount(t, tokens, 1)
-	checkTokenType(t, tokens[0], "whitespace")
-	checkTokenValue(t, tokens[0], "  ")
+	checkToken(t, tokens[0], "whitespace", "  ", 1, 1)
 }
 
 func TestCanTokenizeTabs(t *testing.T) {
 	tokenizer := makeTokenizer()
 	tokens := tokenizer.makeTokens("\t")
 	checkTokenCount(t, tokens, 1)
-	checkTokenType(t, tokens[0], "whitespace")
-	checkTokenValue(t, tokens[0], "\t")
+	checkToken(t, tokens[0], "whitespace", "\t", 1, 1)
 }
 
 func TestCanTokenizeMultipleTabs(t *testing.T) {
 	tokenizer := makeTokenizer()
 	tokens := tokenizer.makeTokens("\t\t")
 	checkTokenCount(t, tokens, 1)
-	checkTokenType(t, tokens[0], "whitespace")
-	checkTokenValue(t, tokens[0], "\t\t")
+	checkToken(t, tokens[0], "whitespace", "\t\t", 1, 1)
 }
 
 func TestCanTokenizeNewlines(t *testing.T) {
 	tokenizer := makeTokenizer()
 	tokens := tokenizer.makeTokens("\n")
 	checkTokenCount(t, tokens, 1)
-	checkTokenType(t, tokens[0], "whitespace")
-	checkTokenValue(t, tokens[0], "\n")
+	checkToken(t, tokens[0], "whitespace", "\n", 1, 1)
 }
 
 func TestCanTokenizeMultipleNewlines(t *testing.T) {
 	tokenizer := makeTokenizer()
 	tokens := tokenizer.makeTokens("\n\n")
 	checkTokenCount(t, tokens, 1)
-	checkTokenType(t, tokens[0], "whitespace")
-	checkTokenValue(t, tokens[0], "\n\n")
+	checkToken(t, tokens[0], "whitespace", "\n\n", 1, 1)
 }
 
 func TestTokenizingNewlineAdvancesLineNumber(t *testing.T) {
-	tokenizer := makeTokenizer()
-	tokens := tokenizer.makeTokens("name\ninstruction")
-	checkTokenCount(t, tokens, 3)
-	checkTokenLineNumber(t, tokens[0], 1)
-	checkTokenLineNumber(t, tokens[1], 1)
-	checkTokenLineNumber(t, tokens[2], 2)
-}
-
-func TestColumnNumberResetsAfterEncounteringNewline(t *testing.T) {
 	tokenizer := makeTokenizer()
 	tokens := tokenizer.makeTokens("name\ninstruction")
 	checkTokenCount(t, tokens, 3)
@@ -181,22 +165,14 @@ func TestCanTokenizeMultipleTokens(t *testing.T) {
 	tokenizer := makeTokenizer()
 	tokens := tokenizer.makeTokens(`name("a name") instruction("do this")`)
 	checkTokenCount(t, tokens, 9)
-	checkTokenType(t, tokens[0], "name")
-	checkTokenValue(t, tokens[0], "name")
-	checkTokenType(t, tokens[1], "openParentheses")
-	checkTokenValue(t, tokens[1], "(")
-	checkTokenType(t, tokens[2], "string")
-	checkTokenValue(t, tokens[2], "a name")
-	checkTokenType(t, tokens[3], "closeParentheses")
-	checkTokenValue(t, tokens[3], ")")
-	checkTokenType(t, tokens[4], "whitespace")
-	checkTokenValue(t, tokens[4], " ")
-	checkTokenType(t, tokens[5], "instruction")
-	checkTokenValue(t, tokens[5], "instruction")
-	checkTokenType(t, tokens[6], "openParentheses")
-	checkTokenValue(t, tokens[6], "(")
-	checkTokenType(t, tokens[7], "string")
-	checkTokenValue(t, tokens[7], "do this")
-	checkTokenType(t, tokens[8], "closeParentheses")
-	checkTokenValue(t, tokens[8], ")")
+
+	checkToken(t, tokens[0], "name", "name", 1, 1)
+	checkToken(t, tokens[1], "openParentheses", "(", 1, 5)
+	checkToken(t, tokens[2], "string", "a name", 1, 6)
+	checkToken(t, tokens[3], "closeParentheses", ")", 1, 14)
+	checkToken(t, tokens[4], "whitespace", " ", 1, 15)
+	checkToken(t, tokens[5], "instruction", "instruction", 1, 16)
+	checkToken(t, tokens[6], "openParentheses", "(", 1, 27)
+	checkToken(t, tokens[7], "string", "do this", 1, 28)
+	checkToken(t, tokens[8], "closeParentheses", ")", 1, 37)
 }
