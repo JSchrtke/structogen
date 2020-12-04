@@ -48,34 +48,34 @@ func checkTokenLineNumber(t *testing.T, token Token, lineNumber int) {
 }
 
 func TestTokenizingEmptyStringDoesNothing(t *testing.T) {
-	var tokenizer Tokenizer
+	tokenizer := makeTokenizer()
 	tokens := tokenizer.makeTokens("")
 	checkTokenCount(t, tokens, 0)
 }
 
 func TestCanTokenizeName(t *testing.T) {
-	var tokenizer Tokenizer
+	tokenizer := makeTokenizer()
 	tokens := tokenizer.makeTokens("name")
 	checkTokenCount(t, tokens, 1)
 	checkTokenType(t, tokens[0], "name")
 }
 
 func TestCanTokenizeOpenParentheses(t *testing.T) {
-	var tokenizer Tokenizer
+	tokenizer := makeTokenizer()
 	tokens := tokenizer.makeTokens("(")
 	checkTokenCount(t, tokens, 1)
 	checkTokenType(t, tokens[0], "openParentheses")
 }
 
 func TestCanTokenizeCloseParentheses(t *testing.T) {
-	var tokenizer Tokenizer
+	tokenizer := makeTokenizer()
 	tokens := tokenizer.makeTokens(")")
 	checkTokenCount(t, tokens, 1)
 	checkTokenType(t, tokens[0], "closeParentheses")
 }
 
 func TestCanTokenizeString(t *testing.T) {
-	var tokenizer Tokenizer
+	tokenizer := makeTokenizer()
 	tokens := tokenizer.makeTokens(`"a test string"`)
 	checkTokenCount(t, tokens, 1)
 	checkTokenType(t, tokens[0], "string")
@@ -83,14 +83,14 @@ func TestCanTokenizeString(t *testing.T) {
 }
 
 func TestCanTokenizeInstruction(t *testing.T) {
-	var tokenizer Tokenizer
+	tokenizer := makeTokenizer()
 	tokens := tokenizer.makeTokens("instruction")
 	checkTokenCount(t, tokens, 1)
 	checkTokenType(t, tokens[0], "instruction")
 }
 
 func TestCanTokenizeSpace(t *testing.T) {
-	var tokenizer Tokenizer
+	tokenizer := makeTokenizer()
 	tokens := tokenizer.makeTokens(" ")
 	checkTokenCount(t, tokens, 1)
 	checkTokenType(t, tokens[0], "whitespace")
@@ -98,7 +98,7 @@ func TestCanTokenizeSpace(t *testing.T) {
 }
 
 func TestCanTokenizeMultipleSpaces(t *testing.T) {
-	var tokenizer Tokenizer
+	tokenizer := makeTokenizer()
 	tokens := tokenizer.makeTokens("  ")
 	checkTokenCount(t, tokens, 1)
 	checkTokenType(t, tokens[0], "whitespace")
@@ -106,7 +106,7 @@ func TestCanTokenizeMultipleSpaces(t *testing.T) {
 }
 
 func TestCanTokenizeTabs(t *testing.T) {
-	var tokenizer Tokenizer
+	tokenizer := makeTokenizer()
 	tokens := tokenizer.makeTokens("\t")
 	checkTokenCount(t, tokens, 1)
 	checkTokenType(t, tokens[0], "whitespace")
@@ -114,7 +114,7 @@ func TestCanTokenizeTabs(t *testing.T) {
 }
 
 func TestCanTokenizeMultipleTabs(t *testing.T) {
-	var tokenizer Tokenizer
+	tokenizer := makeTokenizer()
 	tokens := tokenizer.makeTokens("\t\t")
 	checkTokenCount(t, tokens, 1)
 	checkTokenType(t, tokens[0], "whitespace")
@@ -122,7 +122,7 @@ func TestCanTokenizeMultipleTabs(t *testing.T) {
 }
 
 func TestCanTokenizeNewlines(t *testing.T) {
-	var tokenizer Tokenizer
+	tokenizer := makeTokenizer()
 	tokens := tokenizer.makeTokens("\n")
 	checkTokenCount(t, tokens, 1)
 	checkTokenType(t, tokens[0], "whitespace")
@@ -130,7 +130,7 @@ func TestCanTokenizeNewlines(t *testing.T) {
 }
 
 func TestCanTokenizeMultipleNewlines(t *testing.T) {
-	var tokenizer Tokenizer
+	tokenizer := makeTokenizer()
 	tokens := tokenizer.makeTokens("\n\n")
 	checkTokenCount(t, tokens, 1)
 	checkTokenType(t, tokens[0], "whitespace")
@@ -138,7 +138,7 @@ func TestCanTokenizeMultipleNewlines(t *testing.T) {
 }
 
 func TestTokenizingNewlineAdvancesLineNumber(t *testing.T) {
-	var tokenizer Tokenizer
+	tokenizer := makeTokenizer()
 	tokens := tokenizer.makeTokens("name\ninstruction")
 	checkTokenCount(t, tokens, 3)
 	checkTokenLineNumber(t, tokens[0], 1)
@@ -147,7 +147,7 @@ func TestTokenizingNewlineAdvancesLineNumber(t *testing.T) {
 }
 
 func TestCanTokenizeMultipleTokens(t *testing.T) {
-	var tokenizer Tokenizer
+	tokenizer := makeTokenizer()
 	tokens := tokenizer.makeTokens(`name("a name") instruction("do this")`)
 	checkTokenCount(t, tokens, 9)
 	checkTokenType(t, tokens[0], "name")

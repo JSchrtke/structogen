@@ -1,9 +1,18 @@
 package main
 
 type Tokenizer struct {
-	input       []rune
-	runeIndex   int
-	nextRuneIdx int
+	input             []rune
+	runeIndex         int
+	nextRuneIdx       int
+	currentLineNumber int
+}
+
+func makeTokenizer() Tokenizer {
+	return Tokenizer{
+		runeIndex:         0,
+		nextRuneIdx:       0,
+		currentLineNumber: 1,
+	}
 }
 
 func (t *Tokenizer) isEof() bool {
@@ -21,10 +30,27 @@ func (t *Tokenizer) next() rune {
 	return t.input[t.nextRuneIdx]
 }
 
+func (t *Tokenizer) isNextWhitespace() bool {
+	return string(t.next()) == " " ||
+		string(t.next()) == "\t" ||
+		string(t.next()) == "\n"
+}
+
+func (t *Tokenizer) makeWhitespaceToken(tokenValue string) Token {
+	for !t.isEof() && t.isNextWhitespace() {
+		tokenValue += string(t.readNext())
+	}
+	return Token{
+		tokenType: "whitespace",
+		value:     tokenValue,
+		line:      t.currentLineNumber,
+		column:    t.runeIndex,
+	}
+}
+
 func (t *Tokenizer) makeTokens(s string) []Token {
 	var tokens []Token
 	var runes []rune
-	lineNumber := 1
 	t.nextRuneIdx = 0
 	t.input = []rune(s)
 	for !t.isEof() {
@@ -35,7 +61,7 @@ func (t *Tokenizer) makeTokens(s string) []Token {
 			nameToken := Token{
 				tokenType: "name",
 				value:     "name",
-				line:      lineNumber,
+				line:      t.currentLineNumber,
 				column:    t.runeIndex,
 			}
 			tokens = append(tokens, nameToken)
@@ -44,7 +70,7 @@ func (t *Tokenizer) makeTokens(s string) []Token {
 			openParethesesToken := Token{
 				tokenType: "openParentheses",
 				value:     "(",
-				line:      lineNumber,
+				line:      t.currentLineNumber,
 				column:    t.runeIndex,
 			}
 			tokens = append(tokens, openParethesesToken)
@@ -53,7 +79,7 @@ func (t *Tokenizer) makeTokens(s string) []Token {
 			openParethesesToken := Token{
 				tokenType: "closeParentheses",
 				value:     ")",
-				line:      lineNumber,
+				line:      t.currentLineNumber,
 				column:    t.runeIndex,
 			}
 			tokens = append(tokens, openParethesesToken)
@@ -74,7 +100,7 @@ func (t *Tokenizer) makeTokens(s string) []Token {
 			stringToken := Token{
 				tokenType: "string",
 				value:     str,
-				line:      lineNumber,
+				line:      t.currentLineNumber,
 				column:    startIdx,
 			}
 			tokens = append(tokens, stringToken)
@@ -83,51 +109,24 @@ func (t *Tokenizer) makeTokens(s string) []Token {
 			instructionToken := Token{
 				tokenType: "instruction",
 				value:     "instruction",
-				line:      lineNumber,
+				line:      t.currentLineNumber,
 				column:    t.runeIndex,
 			}
 			tokens = append(tokens, instructionToken)
 			runes = nil
 		case " ":
-			v := " "
-			for !t.isEof() && (string(t.next()) == " ") {
-				v += string(t.readNext())
-			}
-			whitespaceToken := Token{
-				tokenType: "whitespace",
-				value:     v,
-				line:      lineNumber,
-				column:    t.runeIndex,
-			}
+			whitespaceToken := t.makeWhitespaceToken(" ")
 			tokens = append(tokens, whitespaceToken)
 			runes = nil
 		case "\t":
-			v := "\t"
-			for !t.isEof() && (string(t.next()) == "\t") {
-				v += string(t.readNext())
-			}
-			whitespaceToken := Token{
-				tokenType: "whitespace",
-				value:     v,
-				line:      lineNumber,
-				column:    t.runeIndex,
-			}
+			whitespaceToken := t.makeWhitespaceToken("\t")
 			tokens = append(tokens, whitespaceToken)
 			runes = nil
 		case "\n":
-			v := "\n"
-			for !t.isEof() && (string(t.next()) == "\n") {
-				v += string(t.readNext())
-			}
-			whitespaceToken := Token{
-				tokenType: "whitespace",
-				value:     v,
-				line:      lineNumber,
-				column:    t.runeIndex,
-			}
+			whitespaceToken := t.makeWhitespaceToken("\n")
 			tokens = append(tokens, whitespaceToken)
 			runes = nil
-			lineNumber++
+			t.currentLineNumber++
 		}
 	}
 	return tokens
