@@ -134,11 +134,20 @@ func (t *Tokenizer) makeTokens(s string) []Token {
 			t.currentColumnNumber++
 			runes = nil
 		case "\n":
-			whitespaceToken := t.makeWhitespaceToken("\n")
+			tokenValue := "\n"
+			for !t.isEof() && t.isNextWhitespace() {
+				tokenValue += string(t.readNext())
+			}
+			whitespaceToken := Token{
+				tokenType: "whitespace",
+				value:     tokenValue,
+				line:      t.currentLineNumber,
+				column:    t.currentColumnNumber,
+			}
 			tokens = append(tokens, whitespaceToken)
-			runes = nil
-			t.currentLineNumber++
+			t.currentLineNumber += len(tokenValue)
 			t.currentColumnNumber = 1
+			runes = nil
 		}
 	}
 	return tokens

@@ -154,11 +154,13 @@ func TestCanTokenizeMultipleNewlines(t *testing.T) {
 
 func TestTokenizingNewlineAdvancesLineNumber(t *testing.T) {
 	tokenizer := makeTokenizer()
-	tokens := tokenizer.makeTokens("name\ninstruction")
-	checkTokenCount(t, tokens, 3)
+	tokens := tokenizer.makeTokens("name\ninstruction\n\ninstruction")
+	checkTokenCount(t, tokens, 5)
 	checkToken(t, tokens[0], "name", "name", 1, 1)
 	checkToken(t, tokens[1], "whitespace", "\n", 1, 5)
 	checkToken(t, tokens[2], "instruction", "instruction", 2, 1)
+	checkToken(t, tokens[3], "whitespace", "\n\n", 2, 12)
+	checkToken(t, tokens[4], "instruction", "instruction", 4, 1)
 }
 
 func TestCanTokenizeMultipleTokens(t *testing.T) {
