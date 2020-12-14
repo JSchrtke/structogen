@@ -123,30 +123,25 @@ func (t *Tokenizer) makeTokens(s string) []Token {
 			tokens = append(tokens, instructionToken)
 			t.currentColumnNumber += len("instruction")
 			runes = nil
-		case " ":
-			whitespaceToken := t.makeWhitespaceToken(" ")
-			tokens = append(tokens, whitespaceToken)
-			t.currentColumnNumber++
-			runes = nil
-		case "\t":
-			whitespaceToken := t.makeWhitespaceToken("\t")
-			tokens = append(tokens, whitespaceToken)
-			t.currentColumnNumber++
-			runes = nil
-		case "\n":
-			tokenValue := "\n"
+		case " ", "\t", "\n":
 			for !t.isEof() && t.isNextWhitespace() {
-				tokenValue += string(t.readNext())
+				runes = append(runes, t.readNext())
 			}
-			whitespaceToken := Token{
+			whitespace := Token{
 				tokenType: "whitespace",
-				value:     tokenValue,
+				value:     string(runes),
 				line:      t.currentLineNumber,
 				column:    t.currentColumnNumber,
 			}
-			tokens = append(tokens, whitespaceToken)
-			t.currentLineNumber += len(tokenValue)
-			t.currentColumnNumber = 1
+			for _, v := range runes {
+				if string(v) == "\n" {
+					t.currentLineNumber++
+					t.currentColumnNumber = 1
+				} else {
+					t.currentColumnNumber++
+				}
+			}
+			tokens = append(tokens, whitespace)
 			runes = nil
 		}
 	}
