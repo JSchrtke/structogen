@@ -23,38 +23,80 @@ type ParsedObject struct {
 	name string
 }
 
+type Parser struct {
+	tokenIndex int
+	tokens     []Token
+}
+
+func (p *Parser) isEof() bool {
+	return p.tokenIndex >= len(p.tokens)-1
+}
+
+func (p *Parser) next() Token {
+	return p.tokens[p.tokenIndex]
+}
+
+func (p *Parser) readNext() Token {
+	t := p.next()
+	p.tokenIndex++
+	return t
+}
+
 func parseTokens(tokens []Token) (ParsedObject, error) {
+	p := Parser{
+		tokenIndex: 0,
+		tokens:     tokens,
+	}
 	var parsed ParsedObject
 	var err error
-	if tokens[0].tokenType == "name" {
-		// The next token should be a openParentheses
-		if tokens[2].tokenType == "name" {
+	for !p.isEof() {
+		if p.next().tokenType != "name" {
 			return parsed, errors.New(
 				fmt.Sprintf(
-					"%d:%d, names can not be nested",
-					tokens[2].line,
-					tokens[2].column,
+					"%d:%d, structogram has to start with a name",
+					p.next().line,
+					p.next().column,
 				),
 			)
 		}
-		if tokens[2].tokenType != "string" {
-			return parsed, errors.New(
-				fmt.Sprintf(
-					"%d:%d, missing name",
-					tokens[1].line,
-					tokens[1].column,
-				),
-			)
+		switch p.next().tokenType {
+		case "name":
+			// we don't need the name token for anything
+			p.readNext()
+			if p.next().tokenType != "openParentheses" {
+				return parsed, errors.New(
+					fmt.Sprintf(
+						"%d:%d, expected '%s', but got '%s'",
+						p.next().line,
+						p.next().column,
+						"openParentheses",
+						p.readNext().tokenType,
+					),
+				)
+			}
+			tok := p.readNext()
+			if p.next().tokenType == "name" {
+				return parsed, errors.New(
+					fmt.Sprintf(
+						"%d:%d, names can not be nested",
+						p.next().line,
+						p.next().column,
+					),
+				)
+			}
+			if p.next().tokenType != "string" {
+				return parsed, errors.New(
+					fmt.Sprintf(
+						"%d:%d, missing name",
+						tok.line,
+						tok.column,
+					),
+				)
+			} else {
+				tok := p.readNext()
+				parsed.name = tok.value
+			}
 		}
-		parsed.name = tokens[2].value
-	} else {
-		return parsed, errors.New(
-			fmt.Sprintf(
-				"%d:%d, structogram has to start with a name",
-				tokens[0].line,
-				tokens[0].column,
-			),
-		)
 	}
 	return parsed, err
 }
