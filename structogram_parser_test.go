@@ -29,167 +29,36 @@ func TestStructogramHasToHaveAName(t *testing.T) {
 }
 
 func TestEmptyStructogramNameCausesError(t *testing.T) {
-	// Represents the string 'name()'
-	tokens := []Token{
-		{
-			tokenType: "name",
-			value:     "name",
-			line:      1,
-			column:    1,
-		},
-		{
-			tokenType: "openParentheses",
-			value:     "(",
-			line:      1,
-			column:    5,
-		},
-		{
-			tokenType: "closeParentheses",
-			value:     ")",
-			line:      1,
-			column:    6,
-		},
-	}
+	tokenizer := makeTokenizer()
+	tokens := tokenizer.makeTokens("name()")
 	_, err := parseTokens(tokens)
 	checkErrorMsg(t, err, "1:5, missing name")
 }
 
 func TestStructogramsHaveNames(t *testing.T) {
-	// Represents the string 'name("test name")'
-	expectedName := "test name"
-	tokens := []Token{
-		{
-			tokenType: "name",
-			value:     "name",
-			line:      1,
-			column:    1,
-		},
-		{
-			tokenType: "openParentheses",
-			value:     "(",
-			line:      1,
-			column:    5,
-		},
-		{
-			tokenType: "string",
-			value:     "test name",
-			line:      1,
-			column:    6,
-		},
-		{
-			tokenType: "closeParentheses",
-			value:     ")",
-			line:      1,
-			column:    17,
-		},
-	}
+	tokenizer := makeTokenizer()
+	tokens := tokenizer.makeTokens(`name("test name")`)
 	structogram, err := parseTokens(tokens)
 	checkOk(t, err)
 
-	if structogram.name != expectedName {
+	if structogram.name != "test name" {
 		t.Errorf(
 			"Diagram has wrong name, expected: %s, but was: %s",
-			expectedName, structogram.name,
+			"test name", structogram.name,
 		)
 	}
 }
 
 func TestNamesCanNotBeNested(t *testing.T) {
-	// Represents the string '"name(name())"'
-	tokens := []Token{
-		{
-			tokenType: "name",
-			value:     "name",
-			line:      1,
-			column:    1,
-		},
-		{
-			tokenType: "openParentheses",
-			value:     "(",
-			line:      1,
-			column:    5,
-		},
-		{
-			tokenType: "name",
-			value:     "name",
-			line:      1,
-			column:    6,
-		},
-		{
-			tokenType: "openParentheses",
-			value:     "(",
-			line:      1,
-			column:    11,
-		},
-		{
-			tokenType: "closeParentheses",
-			value:     ")",
-			line:      1,
-			column:    12,
-		},
-		{
-			tokenType: "closeParentheses",
-			value:     ")",
-			line:      1,
-			column:    13,
-		},
-	}
+	tokenizer := makeTokenizer()
+	tokens := tokenizer.makeTokens("name(name())")
 	_, err := parseTokens(tokens)
 	checkErrorMsg(t, err, "1:6, names can not be nested")
 }
 
 func TestNameHasToBeFirstToken(t *testing.T) {
-	// Represents the string '"instruction("something")name("a name")"'
-	tokens := []Token{
-		{
-			tokenType: "instruction",
-			value:     "instruction",
-			line:      1,
-			column:    1,
-		},
-		{
-			tokenType: "openParentheses",
-			value:     "(",
-			line:      1,
-			column:    12,
-		},
-		{
-			tokenType: "string",
-			value:     "something",
-			line:      1,
-			column:    13,
-		},
-		{
-			tokenType: "closeParentheses",
-			value:     ")",
-			line:      1,
-			column:    24,
-		},
-		{
-			tokenType: "name",
-			value:     "name",
-			line:      1,
-			column:    25,
-		},
-		{
-			tokenType: "openParentheses",
-			value:     "(",
-			line:      1,
-			column:    29,
-		},
-		{
-			tokenType: "string",
-			value:     "a name",
-			line:      1,
-			column:    30,
-		},
-		{
-			tokenType: "closeParentheses",
-			value:     ")",
-			line:      1,
-			column:    38,
-		},
-	}
+	tokenizer := makeTokenizer()
+	tokens := tokenizer.makeTokens(`instruction("something")name("a name")`)
 	_, err := parseTokens(tokens)
 	checkErrorMsg(t, err, "1:1, structogram has to start with a name")
 }
