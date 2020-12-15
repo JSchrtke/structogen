@@ -3,12 +3,14 @@ package main
 import "testing"
 
 func checkOk(t *testing.T, err error) {
+	t.Helper()
 	if err != nil {
 		t.Errorf("Did not expect any errors")
 	}
 }
 
 func checkErrorMsg(t *testing.T, err error, expectedMsg string) {
+	t.Helper()
 	if err == nil {
 		t.Errorf("Expected error but was nil")
 	}
@@ -61,6 +63,19 @@ func TestNameHasToBeFirstToken(t *testing.T) {
 	tokens := tokenizer.makeTokens(`instruction("something")name("a name")`)
 	_, err := parseTokens(tokens)
 	checkErrorMsg(t, err, "1:1, structogram has to start with a name")
+}
+
+func TestNameValueHasToBeEnclosedByParentheses(t *testing.T) {
+	tokenizer := makeTokenizer()
+
+	tokens := tokenizer.makeTokens(`name"a name"`)
+	_, err := parseTokens(tokens)
+	checkErrorMsg(t, err, "1:5, expected 'openParentheses', but got 'string'")
+
+	tokenizer = makeTokenizer()
+	tokens = tokenizer.makeTokens(`name("a"(`)
+	_, err = parseTokens(tokens)
+	checkErrorMsg(t, err, "1:9, expected 'closeParentheses', but got 'openParentheses'")
 }
 
 func TestInstructionsCanNotBeEmpty(t *testing.T) {

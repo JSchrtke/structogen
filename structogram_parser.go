@@ -92,9 +92,19 @@ func parseTokens(tokens []Token) (ParsedObject, error) {
 						tok.column,
 					),
 				)
-			} else {
-				tok := p.readNext()
-				parsed.name = tok.value
+			}
+			tok = p.readNext()
+			parsed.name = tok.value
+			if p.next().tokenType != "closeParentheses" {
+				return parsed, errors.New(
+					fmt.Sprintf(
+						"%d:%d, expected '%s', but got '%s'",
+						p.next().line,
+						p.next().column,
+						"closeParentheses",
+						p.next().tokenType,
+					),
+				)
 			}
 		}
 	}
