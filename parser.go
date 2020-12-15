@@ -42,6 +42,18 @@ func (p *Parser) readNext() Token {
 	return t
 }
 
+func newTokenValueError(expected string, actual Token) error {
+	return errors.New(
+		fmt.Sprintf(
+			"%d:%d, expected '%s', but got '%s'",
+			actual.line,
+			actual.column,
+			expected,
+			actual.tokenType,
+		),
+	)
+}
+
 func parseTokens(tokens []Token) (ParsedObject, error) {
 	p := Parser{
 		tokenIndex: 0,
@@ -49,30 +61,21 @@ func parseTokens(tokens []Token) (ParsedObject, error) {
 	}
 	var parsed ParsedObject
 	var err error
+	if p.next().tokenType != "name" {
+		return parsed, errors.New(
+			fmt.Sprintf(
+				"%d:%d, structogram has to start with a name",
+				p.next().line,
+				p.next().column,
+			),
+		)
+	}
 	for !p.isEof() {
-		if p.next().tokenType != "name" {
-			return parsed, errors.New(
-				fmt.Sprintf(
-					"%d:%d, structogram has to start with a name",
-					p.next().line,
-					p.next().column,
-				),
-			)
-		}
 		switch p.next().tokenType {
 		case "name":
-			// we don't need the name token for anything
-			p.readNext()
+			_ = p.readNext()
 			if p.next().tokenType != "openParentheses" {
-				return parsed, errors.New(
-					fmt.Sprintf(
-						"%d:%d, expected '%s', but got '%s'",
-						p.next().line,
-						p.next().column,
-						"openParentheses",
-						p.readNext().tokenType,
-					),
-				)
+				return parsed, newTokenValueError("openParentheses", p.next())
 			}
 			tok := p.readNext()
 			if p.next().tokenType == "name" {
@@ -96,15 +99,13 @@ func parseTokens(tokens []Token) (ParsedObject, error) {
 			tok = p.readNext()
 			parsed.name = tok.value
 			if p.next().tokenType != "closeParentheses" {
-				return parsed, errors.New(
-					fmt.Sprintf(
-						"%d:%d, expected '%s', but got '%s'",
-						p.next().line,
-						p.next().column,
-						"closeParentheses",
-						p.next().tokenType,
-					),
-				)
+				return parsed, newTokenValueError("closeParentheses", p.next())
+			}
+			_ = p.readNext()
+		case "instruction":
+			_ = p.readNext()
+			if p.next().tokenType != "openParentheses" {
+				return parsed, newTokenValueError("openParentheses", p.next())
 			}
 		}
 	}

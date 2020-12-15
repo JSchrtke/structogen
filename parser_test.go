@@ -78,6 +78,13 @@ func TestNameValueHasToBeEnclosedByParentheses(t *testing.T) {
 	checkErrorMsg(t, err, "1:9, expected 'closeParentheses', but got 'openParentheses'")
 }
 
+func TestInstructionValueHasToBeEnclosedByParentheses(t *testing.T) {
+	tokenizer := makeTokenizer()
+	tokens := tokenizer.makeTokens(`name("some name")instruction"something")`)
+	_, err := parseTokens(tokens)
+	checkErrorMsg(t, err, "1:29, expected 'openParentheses', but got 'string'")
+}
+
 func TestInstructionsCanNotBeEmpty(t *testing.T) {
 	structogram, err := parseStructogram(
 		"name(test structogram)\ninstruction()",
