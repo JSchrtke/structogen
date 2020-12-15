@@ -86,11 +86,10 @@ func TestInstructionValueHasToBeEnclosedByParentheses(t *testing.T) {
 }
 
 func TestInstructionsCanNotBeEmpty(t *testing.T) {
-	structogram, err := parseStructogram(
-		"name(test structogram)\ninstruction()",
-	)
-	_ = structogram
-	checkErrorMsg(t, err, "Instructions can not be empty!")
+	tokenizer := makeTokenizer()
+	tokens := tokenizer.makeTokens(`name("test structogram")instruction()`)
+	_, err := parseTokens(tokens)
+	checkErrorMsg(t, err, "1:37, expected 'string', but got 'closeParentheses'")
 }
 
 func TestInstuctionsCanNotBeNested(t *testing.T) {

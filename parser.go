@@ -107,6 +107,10 @@ func parseTokens(tokens []Token) (ParsedObject, error) {
 			if p.next().tokenType != "openParentheses" {
 				return parsed, newTokenValueError("openParentheses", p.next())
 			}
+			_ = p.readNext()
+			if p.next().tokenType != "string" {
+				return parsed, newTokenValueError("string", p.next())
+			}
 		}
 	}
 	return parsed, err
