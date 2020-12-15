@@ -93,11 +93,10 @@ func TestInstructionsCanNotBeEmpty(t *testing.T) {
 }
 
 func TestInstuctionsCanNotBeNested(t *testing.T) {
-	structogram, err := parseStructogram(
-		"name(test structogram)\ninstruction(instruction())",
-	)
-	_ = structogram
-	checkErrorMsg(t, err, "Instructions can not be nested!")
+	tokenizer := makeTokenizer()
+	tokens := tokenizer.makeTokens(`name("a")instruction(instruction())`)
+	_, err := parseTokens(tokens)
+	checkErrorMsg(t, err, "1:22, expected 'string', but got 'instruction'")
 }
 
 func TestStructogramCanHaveInstructions(t *testing.T) {
