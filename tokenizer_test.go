@@ -186,3 +186,19 @@ func TestCanTokenizeMultipleTokens(t *testing.T) {
 	checkToken(t, tokens[7], "string", "do this", 1, 28)
 	checkToken(t, tokens[8], "closeParentheses", ")", 1, 37)
 }
+
+func TestTokenizerCanHandleInvalidStrings(t *testing.T) {
+	tokenizer := makeTokenizer()
+	tokens := tokenizer.makeTokens("some invalid string")
+	checkTokenCount(t, tokens, 1)
+	checkToken(t, tokens[0], "invalid", "some invalid string", 1, 1)
+
+	tokenizer = makeTokenizer()
+	tokens = tokenizer.makeTokens(`name("some name")invalid`)
+	checkTokenCount(t, tokens, 5)
+	checkToken(t, tokens[0], "name", "name", 1, 1)
+	checkToken(t, tokens[1], "openParentheses", "(", 1, 5)
+	checkToken(t, tokens[2], "string", "some name", 1, 6)
+	checkToken(t, tokens[3], "closeParentheses", ")", 1, 17)
+	checkToken(t, tokens[4], "invalid", "invalid", 1, 18)
+}

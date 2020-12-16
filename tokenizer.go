@@ -145,5 +145,14 @@ func (t *Tokenizer) makeTokens(s string) []Token {
 			runes = nil
 		}
 	}
+	if len(runes) != 0 {
+		invalid := Token{
+			tokenType: "invalid",
+			value:     string(runes),
+			line:      t.currentLineNumber,
+			column:    t.currentColumnNumber,
+		}
+		tokens = append(tokens, invalid)
+	}
 	return tokens
 }
