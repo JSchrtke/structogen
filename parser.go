@@ -23,7 +23,7 @@ type Parser struct {
 }
 
 func (p *Parser) isEof() bool {
-	return p.tokenIndex >= len(p.tokens)-1
+	return p.tokenIndex > len(p.tokens)-1
 }
 
 func (p *Parser) next() Token {
@@ -89,6 +89,8 @@ func parseTokens(tokens []Token) (Structogram, error) {
 				return parsed, newTokenValueError("closeParentheses", p.next())
 			}
 			_ = p.readNext()
+		case "invalid":
+			return parsed, newTokenValueError("identifier", p.next())
 		}
 	}
 	return parsed, err

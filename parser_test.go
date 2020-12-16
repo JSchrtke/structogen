@@ -129,3 +129,10 @@ func TestStructogramsCanHaveMultipleInstructions(t *testing.T) {
 		)
 	}
 }
+
+func TestParserCanHandleInvalidTokens(t *testing.T) {
+	tokenizer := makeTokenizer()
+	tokens := tokenizer.makeTokens(`name("a")asd`)
+	_, err := parseTokens(tokens)
+	checkErrorMsg(t, err, "1:10, expected 'identifier', but got 'invalid'")
+}
