@@ -27,7 +27,7 @@ func TestEmptyStructogramNameCausesError(t *testing.T) {
 	tokenizer := makeTokenizer()
 	tokens := tokenizer.makeTokens("name()")
 	_, err := parseTokens(tokens)
-	checkErrorMsg(t, err, "1:5, missing name")
+	checkErrorMsg(t, err, "1:6, expected 'string', but got 'closeParentheses'")
 }
 
 func TestStructogramsHaveNames(t *testing.T) {
@@ -48,14 +48,14 @@ func TestNamesCanNotBeNested(t *testing.T) {
 	tokenizer := makeTokenizer()
 	tokens := tokenizer.makeTokens("name(name())")
 	_, err := parseTokens(tokens)
-	checkErrorMsg(t, err, "1:6, names can not be nested")
+	checkErrorMsg(t, err, "1:6, expected 'string', but got 'name'")
 }
 
 func TestNameHasToBeFirstToken(t *testing.T) {
 	tokenizer := makeTokenizer()
 	tokens := tokenizer.makeTokens(`instruction("something")name("a name")`)
 	_, err := parseTokens(tokens)
-	checkErrorMsg(t, err, "1:1, structogram has to start with a name")
+	checkErrorMsg(t, err, "1:1, expected 'name', but got 'instruction'")
 }
 
 func TestNameValueHasToBeEnclosedByParentheses(t *testing.T) {

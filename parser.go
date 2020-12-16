@@ -56,13 +56,7 @@ func parseTokens(tokens []Token) (Structogram, error) {
 	var parsed Structogram
 	var err error
 	if p.next().tokenType != "name" {
-		return parsed, errors.New(
-			fmt.Sprintf(
-				"%d:%d, structogram has to start with a name",
-				p.next().line,
-				p.next().column,
-			),
-		)
+		return parsed, newTokenValueError("name", p.next())
 	}
 	for !p.isEof() {
 		switch p.next().tokenType {
@@ -72,23 +66,8 @@ func parseTokens(tokens []Token) (Structogram, error) {
 				return parsed, newTokenValueError("openParentheses", p.next())
 			}
 			tok := p.readNext()
-			if p.next().tokenType == "name" {
-				return parsed, errors.New(
-					fmt.Sprintf(
-						"%d:%d, names can not be nested",
-						p.next().line,
-						p.next().column,
-					),
-				)
-			}
 			if p.next().tokenType != "string" {
-				return parsed, errors.New(
-					fmt.Sprintf(
-						"%d:%d, missing name",
-						tok.line,
-						tok.column,
-					),
-				)
+				return parsed, newTokenValueError("string", p.next())
 			}
 			tok = p.readNext()
 			parsed.name = tok.value
