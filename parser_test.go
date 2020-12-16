@@ -83,6 +83,11 @@ func TestInstructionValueHasToBeEnclosedByParentheses(t *testing.T) {
 	tokens := tokenizer.makeTokens(`name("some name")instruction"something")`)
 	_, err := parseTokens(tokens)
 	checkErrorMsg(t, err, "1:29, expected 'openParentheses', but got 'string'")
+
+	tokenizer = makeTokenizer()
+	tokens = tokenizer.makeTokens(`name("a")instruction("b"(`)
+	_, err = parseTokens(tokens)
+	checkErrorMsg(t, err, "1:25, expected 'closeParentheses', but got 'openParentheses'")
 }
 
 func TestInstructionsCanNotBeEmpty(t *testing.T) {
