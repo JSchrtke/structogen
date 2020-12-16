@@ -23,13 +23,6 @@ func checkErrorMsg(t *testing.T, err error, expectedMsg string) {
 	}
 }
 
-func TestStructogramHasToHaveAName(t *testing.T) {
-	// TODO Is this test still needed in this form if we are parsing tokens?
-	structogram, err := parseStructogram("has no name token")
-	_ = structogram
-	checkErrorMsg(t, err, "Structogram must have a name!")
-}
-
 func TestEmptyStructogramNameCausesError(t *testing.T) {
 	tokenizer := makeTokenizer()
 	tokens := tokenizer.makeTokens("name()")
