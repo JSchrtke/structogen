@@ -117,17 +117,22 @@ func TestStructogramCanHaveInstructions(t *testing.T) {
 }
 
 func TestStructogramsCanHaveMultipleInstructions(t *testing.T) {
-	structogram, err := parseStructogram(
-		"name(test structogram)\ninstruction(do a thing)\ninstruction(do another thing)",
-	)
+	tokenizer := makeTokenizer()
+	tokens := tokenizer.makeTokens(`name("a")instruction("b")instruction("c")`)
+	structogram, err := parseTokens(tokens)
 	checkOk(t, err)
-	if structogram.instructions[0] != "do a thing" {
-		t.Errorf("Instruction 0 is wrong, expected: %s, but was: %s",
-			"do a thing", structogram.instructions[0],
+	if len(structogram.instructions) != 2 {
+		t.Errorf("Wrong instruction count, expected %d, but was %d",
+			2, len(structogram.instructions),
 		)
-	} else if structogram.instructions[1] != "do another thing" {
+	}
+	if structogram.instructions[0] != "b" {
+		t.Errorf("Instruction 0 is wrong, expected: %s, but was: %s",
+			"b", structogram.instructions[0],
+		)
+	} else if structogram.instructions[1] != "c" {
 		t.Errorf("Instruction 1 is wrong, expected: %s, but was: %s",
-			"do another thing", structogram.instructions[1],
+			"c", structogram.instructions[1],
 		)
 	}
 }
