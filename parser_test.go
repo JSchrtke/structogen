@@ -100,13 +100,13 @@ func TestInstuctionsCanNotBeNested(t *testing.T) {
 }
 
 func TestStructogramCanHaveInstructions(t *testing.T) {
-	structogram, err := parseStructogram(
-		"name(test structogram)\ninstruction(do a thing)",
-	)
+	tokenizer := makeTokenizer()
+	tokens := tokenizer.makeTokens(`name("a")instruction("something")`)
+	structogram, err := parseTokens(tokens)
 	checkOk(t, err)
-	if structogram.instructions[0] != "do a thing" {
-		t.Errorf("Instruction 0 is wrong, expected: %s, but was: %s",
-			"do a thing", structogram.instructions[0],
+	if structogram.instructions[0] != "something" {
+		t.Errorf("Instruction 0 is wrong, expected: '%s', but was: '%s'",
+			"something", structogram.instructions[0],
 		)
 	}
 }

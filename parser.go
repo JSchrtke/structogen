@@ -20,7 +20,8 @@ type Structogram struct {
 
 // TODO find a better name for this
 type ParsedObject struct {
-	name string
+	name         string
+	instructions []string
 }
 
 type Parser struct {
@@ -111,6 +112,7 @@ func parseTokens(tokens []Token) (ParsedObject, error) {
 			if p.next().tokenType != "string" {
 				return parsed, newTokenValueError("string", p.next())
 			}
+			parsed.instructions = append(parsed.instructions, p.readNext().value)
 		}
 	}
 	return parsed, err
