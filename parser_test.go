@@ -24,15 +24,13 @@ func checkErrorMsg(t *testing.T, err error, expectedMsg string) {
 }
 
 func TestEmptyStructogramNameCausesError(t *testing.T) {
-	tokenizer := makeTokenizer()
-	tokens := tokenizer.makeTokens("name()")
+	tokens := makeTokens("name()")
 	_, err := parseTokens(tokens)
 	checkErrorMsg(t, err, "1:6, expected 'string', but got 'closeParentheses'")
 }
 
 func TestStructogramsHaveNames(t *testing.T) {
-	tokenizer := makeTokenizer()
-	tokens := tokenizer.makeTokens(`name("test name")`)
+	tokens := makeTokens(`name("test name")`)
 	structogram, err := parseTokens(tokens)
 	checkOk(t, err)
 
@@ -45,61 +43,52 @@ func TestStructogramsHaveNames(t *testing.T) {
 }
 
 func TestNamesCanNotBeNested(t *testing.T) {
-	tokenizer := makeTokenizer()
-	tokens := tokenizer.makeTokens("name(name())")
+	tokens := makeTokens("name(name())")
 	_, err := parseTokens(tokens)
 	checkErrorMsg(t, err, "1:6, expected 'string', but got 'name'")
 }
 
 func TestNameHasToBeFirstToken(t *testing.T) {
-	tokenizer := makeTokenizer()
-	tokens := tokenizer.makeTokens(`instruction("something")name("a name")`)
+	tokens := makeTokens(`instruction("something")name("a name")`)
 	_, err := parseTokens(tokens)
 	checkErrorMsg(t, err, "1:1, expected 'name', but got 'instruction'")
 }
 
 func TestNameValueHasToBeEnclosedByParentheses(t *testing.T) {
-	tokenizer := makeTokenizer()
 
-	tokens := tokenizer.makeTokens(`name"a name"`)
+	tokens := makeTokens(`name"a name"`)
 	_, err := parseTokens(tokens)
 	checkErrorMsg(t, err, "1:5, expected 'openParentheses', but got 'string'")
 
-	tokenizer = makeTokenizer()
-	tokens = tokenizer.makeTokens(`name("a"(`)
+	tokens = makeTokens(`name("a"(`)
 	_, err = parseTokens(tokens)
 	checkErrorMsg(t, err, "1:9, expected 'closeParentheses', but got 'openParentheses'")
 }
 
 func TestInstructionValueHasToBeEnclosedByParentheses(t *testing.T) {
-	tokenizer := makeTokenizer()
-	tokens := tokenizer.makeTokens(`name("some name")instruction"something")`)
+	tokens := makeTokens(`name("some name")instruction"something")`)
 	_, err := parseTokens(tokens)
 	checkErrorMsg(t, err, "1:29, expected 'openParentheses', but got 'string'")
 
-	tokenizer = makeTokenizer()
-	tokens = tokenizer.makeTokens(`name("a")instruction("b"(`)
+	tokens = makeTokens(`name("a")instruction("b"(`)
 	_, err = parseTokens(tokens)
 	checkErrorMsg(t, err, "1:25, expected 'closeParentheses', but got 'openParentheses'")
 }
 
 func TestInstructionsCanNotBeEmpty(t *testing.T) {
-	tokenizer := makeTokenizer()
-	tokens := tokenizer.makeTokens(`name("test structogram")instruction()`)
+	tokens := makeTokens(`name("test structogram")instruction()`)
 	_, err := parseTokens(tokens)
 	checkErrorMsg(t, err, "1:37, expected 'string', but got 'closeParentheses'")
 }
 
 func TestInstuctionsCanNotBeNested(t *testing.T) {
-	tokenizer := makeTokenizer()
-	tokens := tokenizer.makeTokens(`name("a")instruction(instruction())`)
+	tokens := makeTokens(`name("a")instruction(instruction())`)
 	_, err := parseTokens(tokens)
 	checkErrorMsg(t, err, "1:22, expected 'string', but got 'instruction'")
 }
 
 func TestStructogramCanHaveInstructions(t *testing.T) {
-	tokenizer := makeTokenizer()
-	tokens := tokenizer.makeTokens(`name("a")instruction("something")`)
+	tokens := makeTokens(`name("a")instruction("something")`)
 	structogram, err := parseTokens(tokens)
 	checkOk(t, err)
 	if structogram.instructions[0] != "something" {
@@ -110,8 +99,7 @@ func TestStructogramCanHaveInstructions(t *testing.T) {
 }
 
 func TestStructogramsCanHaveMultipleInstructions(t *testing.T) {
-	tokenizer := makeTokenizer()
-	tokens := tokenizer.makeTokens(`name("a")instruction("b")instruction("c")`)
+	tokens := makeTokens(`name("a")instruction("b")instruction("c")`)
 	structogram, err := parseTokens(tokens)
 	checkOk(t, err)
 	if len(structogram.instructions) != 2 {
@@ -131,15 +119,13 @@ func TestStructogramsCanHaveMultipleInstructions(t *testing.T) {
 }
 
 func TestParserCanHandleInvalidTokens(t *testing.T) {
-	tokenizer := makeTokenizer()
-	tokens := tokenizer.makeTokens(`name("a")asd`)
+	tokens := makeTokens(`name("a")asd`)
 	_, err := parseTokens(tokens)
 	checkErrorMsg(t, err, "1:10, expected 'identifier', but got 'invalid'")
 }
 
 func TestParserIgnoresWhitespaceTokens(t *testing.T) {
-	tokenizer := makeTokenizer()
-	tokens := tokenizer.makeTokens(`name("a")` + "\n " + `instruction("b")`)
+	tokens := makeTokens(`name("a")` + "\n " + `instruction("b")`)
 	_, err := parseTokens(tokens)
 	checkOk(t, err)
 }

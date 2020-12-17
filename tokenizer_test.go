@@ -70,96 +70,84 @@ func checkToken(
 }
 
 func TestCanTokenizeName(t *testing.T) {
-	tokenizer := makeTokenizer()
-	tokens := tokenizer.makeTokens("name")
+	tokens := makeTokens("name")
 	checkTokenCount(t, tokens, 2)
 	checkToken(t, tokens[0], "name", "name", 1, 1)
 	checkToken(t, tokens[1], "EOF", "EOF", 1, 5)
 }
 
 func TestCanTokenizeOpenParentheses(t *testing.T) {
-	tokenizer := makeTokenizer()
-	tokens := tokenizer.makeTokens("(")
+	tokens := makeTokens("(")
 	checkTokenCount(t, tokens, 2)
 	checkToken(t, tokens[0], "openParentheses", "(", 1, 1)
 	checkToken(t, tokens[1], "EOF", "EOF", 1, 2)
 }
 
 func TestCanTokenizeCloseParentheses(t *testing.T) {
-	tokenizer := makeTokenizer()
-	tokens := tokenizer.makeTokens(")")
+	tokens := makeTokens(")")
 	checkTokenCount(t, tokens, 2)
 	checkToken(t, tokens[0], "closeParentheses", ")", 1, 1)
 	checkToken(t, tokens[1], "EOF", "EOF", 1, 2)
 }
 
 func TestCanTokenizeString(t *testing.T) {
-	tokenizer := makeTokenizer()
-	tokens := tokenizer.makeTokens(`"a test string"`)
+	tokens := makeTokens(`"a test string"`)
 	checkTokenCount(t, tokens, 2)
 	checkToken(t, tokens[0], "string", "a test string", 1, 1)
 	checkToken(t, tokens[1], "EOF", "EOF", 1, 16)
 }
 
 func TestCanTokenizeInstruction(t *testing.T) {
-	tokenizer := makeTokenizer()
-	tokens := tokenizer.makeTokens("instruction")
+	tokens := makeTokens("instruction")
 	checkTokenCount(t, tokens, 2)
 	checkToken(t, tokens[0], "instruction", "instruction", 1, 1)
 	checkToken(t, tokens[1], "EOF", "EOF", 1, 12)
 }
 
 func TestCanTokenizeSpace(t *testing.T) {
-	tokenizer := makeTokenizer()
-	tokens := tokenizer.makeTokens(" ")
+	tokens := makeTokens(" ")
 	checkTokenCount(t, tokens, 2)
 	checkToken(t, tokens[0], "whitespace", " ", 1, 1)
 	checkToken(t, tokens[1], "EOF", "EOF", 1, 2)
 }
 
 func TestCanTokenizeMultipleSpaces(t *testing.T) {
-	tokenizer := makeTokenizer()
-	tokens := tokenizer.makeTokens("  ")
+	tokens := makeTokens("  ")
 	checkTokenCount(t, tokens, 2)
 	checkToken(t, tokens[0], "whitespace", "  ", 1, 1)
 	checkToken(t, tokens[1], "EOF", "EOF", 1, 3)
 }
 
 func TestCanTokenizeTabs(t *testing.T) {
-	tokenizer := makeTokenizer()
-	tokens := tokenizer.makeTokens("\t")
+	tokens := makeTokens("\t")
 	checkTokenCount(t, tokens, 2)
 	checkToken(t, tokens[0], "whitespace", "\t", 1, 1)
 	checkToken(t, tokens[1], "EOF", "EOF", 1, 2)
 }
 
 func TestCanTokenizeMultipleTabs(t *testing.T) {
-	tokenizer := makeTokenizer()
-	tokens := tokenizer.makeTokens("\t\t")
+	tokens := makeTokens("\t\t")
 	checkTokenCount(t, tokens, 2)
 	checkToken(t, tokens[0], "whitespace", "\t\t", 1, 1)
 	checkToken(t, tokens[1], "EOF", "EOF", 1, 3)
 }
 
 func TestCanTokenizeNewlines(t *testing.T) {
-	tokenizer := makeTokenizer()
-	tokens := tokenizer.makeTokens("\n")
+	tokens := makeTokens("\n")
 	checkTokenCount(t, tokens, 2)
 	checkToken(t, tokens[0], "whitespace", "\n", 1, 1)
 	checkToken(t, tokens[1], "EOF", "EOF", 2, 1)
 }
 
 func TestCanTokenizeMultipleNewlines(t *testing.T) {
-	tokenizer := makeTokenizer()
-	tokens := tokenizer.makeTokens("\n\n")
+	tokens := makeTokens("\n\n")
 	checkTokenCount(t, tokens, 2)
 	checkToken(t, tokens[0], "whitespace", "\n\n", 1, 1)
 	checkToken(t, tokens[1], "EOF", "EOF", 3, 1)
 }
 
 func TestTokenizingNewlineAdvancesLineNumber(t *testing.T) {
-	tokenizer := makeTokenizer()
-	tokens := tokenizer.makeTokens("name\ninstruction\n\ninstruction")
+	tokens := makeTokens("name\ninstruction\n\ninstruction")
 	checkTokenCount(t, tokens, 6)
 	checkToken(t, tokens[0], "name", "name", 1, 1)
 	checkToken(t, tokens[1], "whitespace", "\n", 1, 5)
@@ -170,8 +158,7 @@ func TestTokenizingNewlineAdvancesLineNumber(t *testing.T) {
 }
 
 func TestDifferentWhitespacesAreOneToken(t *testing.T) {
-	tokenizer := makeTokenizer()
-	tokens := tokenizer.makeTokens("\t \nname")
+	tokens := makeTokens("\t \nname")
 	checkTokenCount(t, tokens, 3)
 	checkToken(t, tokens[0], "whitespace", "\t \n", 1, 1)
 	checkToken(t, tokens[1], "name", "name", 2, 1)
@@ -179,8 +166,7 @@ func TestDifferentWhitespacesAreOneToken(t *testing.T) {
 }
 
 func TestCanTokenizeMultipleTokens(t *testing.T) {
-	tokenizer := makeTokenizer()
-	tokens := tokenizer.makeTokens(`name("a name") instruction("do this")`)
+	tokens := makeTokens(`name("a name") instruction("do this")`)
 	checkTokenCount(t, tokens, 10)
 
 	checkToken(t, tokens[0], "name", "name", 1, 1)
@@ -196,22 +182,19 @@ func TestCanTokenizeMultipleTokens(t *testing.T) {
 }
 
 func TestInvalidTokenAdvancesColumnByLengthOfInvalidString(t *testing.T) {
-	tokenizer := makeTokenizer()
-	tokens := tokenizer.makeTokens("invalid")
+	tokens := makeTokens("invalid")
 	checkTokenCount(t, tokens, 2)
 	checkToken(t, tokens[0], "invalid", "invalid", 1, 1)
 	checkToken(t, tokens[1], "EOF", "EOF", 1, 8)
 }
 
-func TestTokenizerCanHandleInvalidStrings(t *testing.T) {
-	tokenizer := makeTokenizer()
-	tokens := tokenizer.makeTokens("some invalid string")
+func TestCanTokenizeInvalidStrings(t *testing.T) {
+	tokens := makeTokens("some invalid string")
 	checkTokenCount(t, tokens, 2)
 	checkToken(t, tokens[0], "invalid", "some invalid string", 1, 1)
 	checkToken(t, tokens[1], "EOF", "EOF", 1, 20)
 
-	tokenizer = makeTokenizer()
-	tokens = tokenizer.makeTokens(`name("some name")invalid`)
+	tokens = makeTokens(`name("some name")invalid`)
 	checkTokenCount(t, tokens, 6)
 	checkToken(t, tokens[0], "name", "name", 1, 1)
 	checkToken(t, tokens[1], "openParentheses", "(", 1, 5)
@@ -222,15 +205,13 @@ func TestTokenizerCanHandleInvalidStrings(t *testing.T) {
 }
 
 func TestCanTokenizeEof(t *testing.T) {
-	tokenizer := makeTokenizer()
-	tokens := tokenizer.makeTokens("")
+	tokens := makeTokens("")
 	checkTokenCount(t, tokens, 1)
 	checkToken(t, tokens[0], "EOF", "EOF", 1, 1)
 }
 
 func TestStringTokensCanBeDelimitedByBothQuotationMarkTypes(t *testing.T) {
-	tokenizer := makeTokenizer()
-	tokens := tokenizer.makeTokens(`"'a'"'"b"'`)
+	tokens := makeTokens(`"'a'"'"b"'`)
 	checkTokenCount(t, tokens, 3)
 	checkToken(t, tokens[0], "string", "'a'", 1, 1)
 	checkToken(t, tokens[1], "string", `"b"`, 1, 6)

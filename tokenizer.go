@@ -68,7 +68,8 @@ func (t *Tokenizer) emitToken(tokenType string) {
 	t.runes = nil
 }
 
-func (t *Tokenizer) makeTokens(s string) []Token {
+func makeTokens(s string) []Token {
+	t := makeTokenizer()
 	t.nextRuneIdx = 0
 	t.input = []rune(s)
 	for !t.isEof() {
