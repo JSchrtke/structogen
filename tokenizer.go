@@ -80,14 +80,14 @@ func (t *Tokenizer) makeTokens(s string) []Token {
 			tokens = append(tokens, openParethesesToken)
 			runes = nil
 		case ")":
-			openParethesesToken := Token{
+			closeParenthesesToken := Token{
 				tokenType: "closeParentheses",
 				value:     ")",
 				line:      t.currentLineNumber,
 				column:    t.currentColumnNumber,
 			}
 			t.currentColumnNumber++
-			tokens = append(tokens, openParethesesToken)
+			tokens = append(tokens, closeParenthesesToken)
 			runes = nil
 		case `"`:
 			str := ""
