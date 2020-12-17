@@ -146,13 +146,15 @@ func (t *Tokenizer) makeTokens(s string) []Token {
 		}
 	}
 	if len(runes) != 0 {
+		v := string(runes)
 		invalid := Token{
 			tokenType: "invalid",
-			value:     string(runes),
+			value:     v,
 			line:      t.currentLineNumber,
 			column:    t.currentColumnNumber,
 		}
 		tokens = append(tokens, invalid)
+		t.currentColumnNumber += len(v)
 	}
 	tokens = append(tokens, Token{
 		tokenType: "EOF",

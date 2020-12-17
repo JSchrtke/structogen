@@ -195,16 +195,20 @@ func TestCanTokenizeMultipleTokens(t *testing.T) {
 	checkToken(t, tokens[9], "EOF", "EOF", 1, 38)
 }
 
-// TODO This is failing because the invalid tokens just increases the column
-// count by one, instead of the length of the invalid string.
-// Instead, it should increase the column count by the length of the invalid
-// string
+func TestInvalidTokenAdvancesColumnByLengthOfInvalidString(t *testing.T) {
+	tokenizer := makeTokenizer()
+	tokens := tokenizer.makeTokens("invalid")
+	checkTokenCount(t, tokens, 2)
+	checkToken(t, tokens[0], "invalid", "invalid", 1, 1)
+	checkToken(t, tokens[1], "EOF", "EOF", 1, 8)
+}
+
 func TestTokenizerCanHandleInvalidStrings(t *testing.T) {
 	tokenizer := makeTokenizer()
 	tokens := tokenizer.makeTokens("some invalid string")
 	checkTokenCount(t, tokens, 2)
 	checkToken(t, tokens[0], "invalid", "some invalid string", 1, 1)
-	checkToken(t, tokens[1], "EOF", "EOF", 1, 22)
+	checkToken(t, tokens[1], "EOF", "EOF", 1, 20)
 
 	tokenizer = makeTokenizer()
 	tokens = tokenizer.makeTokens(`name("some name")invalid`)
@@ -214,7 +218,7 @@ func TestTokenizerCanHandleInvalidStrings(t *testing.T) {
 	checkToken(t, tokens[2], "string", "some name", 1, 6)
 	checkToken(t, tokens[3], "closeParentheses", ")", 1, 17)
 	checkToken(t, tokens[4], "invalid", "invalid", 1, 18)
-	checkToken(t, tokens[5], "EOF", "EOF", 1, 26)
+	checkToken(t, tokens[5], "EOF", "EOF", 1, 25)
 }
 
 func TestCanTokenizeEof(t *testing.T) {
