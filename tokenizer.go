@@ -6,6 +6,8 @@ type Tokenizer struct {
 	nextRuneIdx         int
 	currentLineNumber   int
 	currentColumnNumber int
+	tokens              []Token
+	runes               []rune
 }
 
 func makeTokenizer() Tokenizer {
@@ -50,47 +52,37 @@ func (t *Tokenizer) makeWhitespaceToken(tokenValue string) Token {
 	}
 }
 
+func (t *Tokenizer) emitToken(tokenType string) {
+	v := string(t.runes)
+	if tokenType == "EOF" {
+		v = "EOF"
+	}
+	tok := Token{
+		tokenType: tokenType,
+		value:     v,
+		line:      t.currentLineNumber,
+		column:    t.currentColumnNumber,
+	}
+	t.tokens = append(t.tokens, tok)
+	t.currentColumnNumber += len(v)
+	t.runes = nil
+}
+
 func (t *Tokenizer) makeTokens(s string) []Token {
-	var tokens []Token
-	var runes []rune
 	t.nextRuneIdx = 0
 	t.input = []rune(s)
 	for !t.isEof() {
 		r := t.readNext()
-		runes = append(runes, r)
-		switch string(runes) {
+		t.runes = append(t.runes, r)
+		switch string(t.runes) {
 		case "name":
-			nameToken := Token{
-				tokenType: "name",
-				value:     "name",
-				line:      t.currentLineNumber,
-				column:    t.currentColumnNumber,
-			}
-			tokens = append(tokens, nameToken)
-			t.currentColumnNumber += len("name")
-			runes = nil
+			t.emitToken("name")
 		case "(":
-			openParethesesToken := Token{
-				tokenType: "openParentheses",
-				value:     "(",
-				line:      t.currentLineNumber,
-				column:    t.currentColumnNumber,
-			}
-			t.currentColumnNumber++
-			tokens = append(tokens, openParethesesToken)
-			runes = nil
+			t.emitToken("openParentheses")
 		case ")":
-			closeParenthesesToken := Token{
-				tokenType: "closeParentheses",
-				value:     ")",
-				line:      t.currentLineNumber,
-				column:    t.currentColumnNumber,
-			}
-			t.currentColumnNumber++
-			tokens = append(tokens, closeParenthesesToken)
-			runes = nil
+			t.emitToken("closeParentheses")
 		case `"`, "'":
-			quot := string(runes)
+			quot := string(t.runes)
 			str := ""
 			for !t.isEof() {
 				if string(t.next()) != quot {
@@ -108,33 +100,25 @@ func (t *Tokenizer) makeTokens(s string) []Token {
 				line:      t.currentLineNumber,
 				column:    t.currentColumnNumber,
 			}
-			tokens = append(tokens, stringToken)
+			t.tokens = append(t.tokens, stringToken)
 			// While we don't want the quotation marks in the value of the
 			// string, we do have to make sure the column number is still
 			// correct.
 			t.currentColumnNumber += len(str) + 2
-			runes = nil
+			t.runes = nil
 		case "instruction":
-			instructionToken := Token{
-				tokenType: "instruction",
-				value:     "instruction",
-				line:      t.currentLineNumber,
-				column:    t.currentColumnNumber,
-			}
-			tokens = append(tokens, instructionToken)
-			t.currentColumnNumber += len("instruction")
-			runes = nil
+			t.emitToken("instruction")
 		case " ", "\t", "\n":
 			for !t.isEof() && t.isNextWhitespace() {
-				runes = append(runes, t.readNext())
+				t.runes = append(t.runes, t.readNext())
 			}
 			whitespace := Token{
 				tokenType: "whitespace",
-				value:     string(runes),
+				value:     string(t.runes),
 				line:      t.currentLineNumber,
 				column:    t.currentColumnNumber,
 			}
-			for _, v := range runes {
+			for _, v := range t.runes {
 				if string(v) == "\n" {
 					t.currentLineNumber++
 					t.currentColumnNumber = 1
@@ -142,26 +126,13 @@ func (t *Tokenizer) makeTokens(s string) []Token {
 					t.currentColumnNumber++
 				}
 			}
-			tokens = append(tokens, whitespace)
-			runes = nil
+			t.tokens = append(t.tokens, whitespace)
+			t.runes = nil
 		}
 	}
-	if len(runes) != 0 {
-		v := string(runes)
-		invalid := Token{
-			tokenType: "invalid",
-			value:     v,
-			line:      t.currentLineNumber,
-			column:    t.currentColumnNumber,
-		}
-		tokens = append(tokens, invalid)
-		t.currentColumnNumber += len(v)
+	if len(t.runes) != 0 {
+		t.emitToken("invalid")
 	}
-	tokens = append(tokens, Token{
-		tokenType: "EOF",
-		value:     "EOF",
-		line:      t.currentLineNumber,
-		column:    t.currentColumnNumber,
-	})
-	return tokens
+	t.emitToken("EOF")
+	return t.tokens
 }
