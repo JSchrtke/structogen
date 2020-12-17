@@ -10,15 +10,6 @@ type Tokenizer struct {
 	runes               []rune
 }
 
-func makeTokenizer() Tokenizer {
-	return Tokenizer{
-		runeIndex:           0,
-		nextRuneIdx:         0,
-		currentLineNumber:   1,
-		currentColumnNumber: 1,
-	}
-}
-
 func (t *Tokenizer) isEof() bool {
 	return t.nextRuneIdx > len(t.input)-1
 }
@@ -69,7 +60,12 @@ func (t *Tokenizer) emitToken(tokenType string) {
 }
 
 func makeTokens(s string) []Token {
-	t := makeTokenizer()
+	t := Tokenizer{
+		runeIndex:           0,
+		nextRuneIdx:         0,
+		currentLineNumber:   1,
+		currentColumnNumber: 1,
+	}
 	t.nextRuneIdx = 0
 	t.input = []rune(s)
 	for !t.isEof() {
