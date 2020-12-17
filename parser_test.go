@@ -5,7 +5,7 @@ import "testing"
 func checkOk(t *testing.T, err error) {
 	t.Helper()
 	if err != nil {
-		t.Errorf("Did not expect any errors")
+		t.Errorf("Did not expect any errors, but got %s", err.Error())
 	}
 }
 
@@ -135,4 +135,11 @@ func TestParserCanHandleInvalidTokens(t *testing.T) {
 	tokens := tokenizer.makeTokens(`name("a")asd`)
 	_, err := parseTokens(tokens)
 	checkErrorMsg(t, err, "1:10, expected 'identifier', but got 'invalid'")
+}
+
+func TestParserIgnoresWhitespaceTokens(t *testing.T) {
+	tokenizer := makeTokenizer()
+	tokens := tokenizer.makeTokens(`name("a")` + "\n " + `instruction("b")`)
+	_, err := parseTokens(tokens)
+	checkOk(t, err)
 }

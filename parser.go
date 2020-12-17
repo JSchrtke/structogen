@@ -89,6 +89,9 @@ func parseTokens(tokens []Token) (Structogram, error) {
 				return parsed, newTokenValueError("closeParentheses", p.next())
 			}
 			_ = p.readNext()
+		case "whitespace":
+			// Whitespace should be completely ignored
+			_ = p.readNext()
 		case "invalid":
 			return parsed, newTokenValueError("identifier", p.next())
 		}
