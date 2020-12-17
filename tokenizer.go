@@ -89,10 +89,11 @@ func (t *Tokenizer) makeTokens(s string) []Token {
 			t.currentColumnNumber++
 			tokens = append(tokens, closeParenthesesToken)
 			runes = nil
-		case `"`:
+		case `"`, "'":
+			quot := string(runes)
 			str := ""
 			for !t.isEof() {
-				if string(t.next()) != `"` {
+				if string(t.next()) != quot {
 					str += string(t.readNext())
 				} else {
 					// We don't want the quotation marks in the string, so when

@@ -227,3 +227,12 @@ func TestCanTokenizeEof(t *testing.T) {
 	checkTokenCount(t, tokens, 1)
 	checkToken(t, tokens[0], "EOF", "EOF", 1, 1)
 }
+
+func TestStringTokensCanBeDelimitedByBothQuotationMarkTypes(t *testing.T) {
+	tokenizer := makeTokenizer()
+	tokens := tokenizer.makeTokens(`"'a'"'"b"'`)
+	checkTokenCount(t, tokens, 3)
+	checkToken(t, tokens[0], "string", "'a'", 1, 1)
+	checkToken(t, tokens[1], "string", `"b"`, 1, 6)
+	checkToken(t, tokens[2], "EOF", "EOF", 1, 11)
+}
