@@ -22,10 +22,6 @@ type Parser struct {
 	tokens     []Token
 }
 
-func (p *Parser) isEof() bool {
-	return p.tokenIndex > len(p.tokens)-1
-}
-
 func (p *Parser) next() Token {
 	return p.tokens[p.tokenIndex]
 }
@@ -58,7 +54,7 @@ func parseTokens(tokens []Token) (Structogram, error) {
 	if p.next().tokenType != "name" {
 		return parsed, newTokenValueError("name", p.next())
 	}
-	for !p.isEof() {
+	for {
 		switch p.next().tokenType {
 		case "name":
 			_ = p.readNext()
@@ -94,7 +90,8 @@ func parseTokens(tokens []Token) (Structogram, error) {
 			_ = p.readNext()
 		case "invalid":
 			return parsed, newTokenValueError("identifier", p.next())
+		case "EOF":
+			return parsed, err
 		}
 	}
-	return parsed, err
 }

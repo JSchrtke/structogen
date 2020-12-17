@@ -154,5 +154,11 @@ func (t *Tokenizer) makeTokens(s string) []Token {
 		}
 		tokens = append(tokens, invalid)
 	}
+	tokens = append(tokens, Token{
+		tokenType: "EOF",
+		value:     "EOF",
+		line:      t.currentLineNumber,
+		column:    t.currentColumnNumber,
+	})
 	return tokens
 }
