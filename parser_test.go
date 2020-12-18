@@ -129,3 +129,19 @@ func TestParserIgnoresWhitespaceTokens(t *testing.T) {
 	_, err := parseTokens(tokens)
 	checkOk(t, err)
 }
+
+func TestIfTokenValuesAreEnclosedByParentheses(t *testing.T) {
+	tokens := makeTokens(`name("a")if"b")`)
+	_, err := parseTokens(tokens)
+	checkErrorMsg(t, err, "1:12, expected 'openParentheses', but got 'string'")
+
+	tokens = makeTokens(`name("a")if("b"`)
+	_, err = parseTokens(tokens)
+	checkErrorMsg(t, err, "1:16, expected 'closeParentheses', but got 'EOF'")
+}
+
+func TestIfTokenValueCanNotBeEmpty(t *testing.T) {
+	tokens := makeTokens(`name("a")if()`)
+	_, err := parseTokens(tokens)
+	checkErrorMsg(t, err, "1:13, expected 'string', but got 'closeParentheses'")
+}

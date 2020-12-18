@@ -88,6 +88,22 @@ func parseTokens(tokens []Token) (Structogram, error) {
 		case "whitespace":
 			// Whitespace should be completely ignored
 			_ = p.readNext()
+		case "if":
+			_ = p.readNext()
+			if p.next().tokenType != "openParentheses" {
+				return parsed, newTokenValueError("openParentheses", p.next())
+			}
+			// Discard the openParentheses
+			_ = p.readNext()
+			if p.next().tokenType != "string" {
+				return parsed, newTokenValueError("string", p.next())
+			}
+			// this is the value of the if, it get's discarded for now. Will be
+			// implemented properly in a later test
+			_ = p.readNext()
+			if p.next().tokenType != "closeParentheses" {
+				return parsed, newTokenValueError("closeParentheses", p.next())
+			}
 		case "invalid":
 			return parsed, newTokenValueError("identifier", p.next())
 		case "EOF":
