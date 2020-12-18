@@ -80,6 +80,10 @@ func makeTokens(s string) []Token {
 			t.emitToken("closeParentheses")
 		case "if":
 			t.emitToken("if")
+		case "{":
+			t.emitToken("openBrace")
+		case "}":
+			t.emitToken("closeBrace")
 		case `"`, "'":
 			quot := string(t.runes)
 			str := ""

@@ -86,24 +86,42 @@ func parseTokens(tokens []Token) (Structogram, error) {
 			}
 			_ = p.readNext()
 		case "whitespace":
+			// TODO Maybe have a function that runs once that strips all the
+			// whitespace out of the tokens?
 			// Whitespace should be completely ignored
 			_ = p.readNext()
 		case "if":
-			_ = p.readNext()
+			p.readNext()
 			if p.next().tokenType != "openParentheses" {
 				return parsed, newTokenValueError("openParentheses", p.next())
 			}
 			// Discard the openParentheses
-			_ = p.readNext()
+			p.readNext()
 			if p.next().tokenType != "string" {
 				return parsed, newTokenValueError("string", p.next())
 			}
 			// this is the value of the if, it get's discarded for now. Will be
 			// implemented properly in a later test
-			_ = p.readNext()
+			p.readNext()
 			if p.next().tokenType != "closeParentheses" {
 				return parsed, newTokenValueError("closeParentheses", p.next())
 			}
+			p.readNext()
+			if p.next().tokenType == "whitespace" {
+				p.readNext()
+			}
+			if p.next().tokenType != "openBrace" {
+				return parsed, newTokenValueError("openBrace", p.next())
+			}
+			p.readNext()
+			if p.next().tokenType != "string" {
+				return parsed, newTokenValueError("string", p.next())
+			}
+			p.readNext()
+			if p.next().tokenType != "closeBrace" {
+				return parsed, newTokenValueError("closeBrace", p.next())
+			}
+			p.readNext()
 		case "invalid":
 			return parsed, newTokenValueError("identifier", p.next())
 		case "EOF":

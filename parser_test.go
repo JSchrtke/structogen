@@ -145,3 +145,23 @@ func TestIfTokenValueCanNotBeEmpty(t *testing.T) {
 	_, err := parseTokens(tokens)
 	checkErrorMsg(t, err, "1:13, expected 'string', but got 'closeParentheses'")
 }
+
+func TestIfTokenHasToHaveABody(t *testing.T) {
+	tokens := makeTokens(`name("a")if("b")`)
+	_, err := parseTokens(tokens)
+	checkErrorMsg(t, err, "1:17, expected 'openBrace', but got 'EOF'")
+
+	tokens = makeTokens(`name("a")if("b"){`)
+	_, err = parseTokens(tokens)
+	checkErrorMsg(t, err, "1:18, expected 'string', but got 'EOF'")
+
+	tokens = makeTokens(`name("a")if("b"){"c"`)
+	_, err = parseTokens(tokens)
+	checkErrorMsg(t, err, "1:21, expected 'closeBrace', but got 'EOF'")
+}
+
+func TestIfTokenCanHaveWhitespaceBetweenConditionAndBody(t *testing.T) {
+	tokens := makeTokens(`name("a")if("b")` + "\n " + `{"c"}`)
+	_, err := parseTokens(tokens)
+	checkOk(t, err)
+}

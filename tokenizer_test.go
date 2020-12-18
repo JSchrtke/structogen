@@ -224,3 +224,17 @@ func TestCanTokenizeIf(t *testing.T) {
 	checkToken(t, tokens[0], "if", "if", 1, 1)
 	checkToken(t, tokens[1], "EOF", "EOF", 1, 3)
 }
+
+func TestCanTokenizeOpenBrace(t *testing.T) {
+	tokens := makeTokens("{")
+	checkTokenCount(t, tokens, 2)
+	checkToken(t, tokens[0], "openBrace", "{", 1, 1)
+	checkToken(t, tokens[1], "EOF", "EOF", 1, 2)
+}
+
+func TestCanTokenizeCloseBrace(t *testing.T) {
+	tokens := makeTokens("}")
+	checkTokenCount(t, tokens, 2)
+	checkToken(t, tokens[0], "closeBrace", "}", 1, 1)
+	checkToken(t, tokens[1], "EOF", "EOF", 1, 2)
+}
