@@ -217,3 +217,10 @@ func TestStringTokensCanBeDelimitedByBothQuotationMarkTypes(t *testing.T) {
 	checkToken(t, tokens[1], "string", `"b"`, 1, 6)
 	checkToken(t, tokens[2], "EOF", "EOF", 1, 11)
 }
+
+func TestCanTokenizeIf(t *testing.T) {
+	tokens := makeTokens("if")
+	checkTokenCount(t, tokens, 2)
+	checkToken(t, tokens[0], "if", "if", 1, 1)
+	checkToken(t, tokens[1], "EOF", "EOF", 1, 3)
+}
