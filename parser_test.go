@@ -121,6 +121,7 @@ func TestStructogramsCanHaveMultipleInstructions(t *testing.T) {
 func TestParserCanHandleInvalidTokens(t *testing.T) {
 	tokens := makeTokens(`name("a")asd`)
 	_, err := parseTokens(tokens)
+	// TODO it's not called 'identifier', it's actually a keyword
 	checkErrorMsg(t, err, "1:10, expected 'identifier', but got 'invalid'")
 }
 
@@ -146,22 +147,31 @@ func TestIfTokenValueCanNotBeEmpty(t *testing.T) {
 	checkErrorMsg(t, err, "1:13, expected 'string', but got 'closeParentheses'")
 }
 
-func TestIfTokenHasToHaveABody(t *testing.T) {
+func TestIfTokenHasToHaveBody(t *testing.T) {
 	tokens := makeTokens(`name("a")if("b")`)
 	_, err := parseTokens(tokens)
 	checkErrorMsg(t, err, "1:17, expected 'openBrace', but got 'EOF'")
 
+	// The only valid tokens inside of an if-body are keywords or whitespace.
+	// Whitespace should get entirely ignored, and anything that is not a
+	// keyword, so either a string or EOF should cause an error.
+	// The only exception are openParentheses, which are legal if they
+	// are preceeded by a keyword
 	tokens = makeTokens(`name("a")if("b"){`)
 	_, err = parseTokens(tokens)
-	checkErrorMsg(t, err, "1:18, expected 'string', but got 'EOF'")
+	checkErrorMsg(t, err, "1:18, expected 'keyword', but got 'EOF'")
 
 	tokens = makeTokens(`name("a")if("b"){"c"`)
 	_, err = parseTokens(tokens)
-	checkErrorMsg(t, err, "1:21, expected 'closeBrace', but got 'EOF'")
+	checkErrorMsg(t, err, "1:18, expected 'keyword', but got 'string'")
+
+	tokens = makeTokens(`name("a")if("b"){name}`)
+	_, err = parseTokens(tokens)
+	checkErrorMsg(t, err, "1:18, expected 'keyword', but got 'name'")
 }
 
 func TestIfTokenCanHaveWhitespaceBetweenConditionAndBody(t *testing.T) {
-	tokens := makeTokens(`name("a")if("b")` + "\n " + `{"c"}`)
+	tokens := makeTokens(`name("a")if("b")` + "\n " + `{instruction}`)
 	_, err := parseTokens(tokens)
 	checkOk(t, err)
 }

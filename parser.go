@@ -44,6 +44,10 @@ func newTokenValueError(expected string, actual Token) error {
 	)
 }
 
+func isKeyword(s string) bool {
+	return s == "instruction" || s == "if"
+}
+
 func parseTokens(tokens []Token) (Structogram, error) {
 	p := Parser{
 		tokenIndex: 0,
@@ -114,10 +118,13 @@ func parseTokens(tokens []Token) (Structogram, error) {
 				return parsed, newTokenValueError("openBrace", p.next())
 			}
 			p.readNext()
-			if p.next().tokenType != "string" {
-				return parsed, newTokenValueError("string", p.next())
+
+			if !isKeyword(p.next().tokenType) {
+				return parsed, newTokenValueError("keyword", p.next())
 			}
+			// Discard the keyword token for now
 			p.readNext()
+
 			if p.next().tokenType != "closeBrace" {
 				return parsed, newTokenValueError("closeBrace", p.next())
 			}
