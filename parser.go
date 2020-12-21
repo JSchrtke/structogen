@@ -122,8 +122,28 @@ func parseTokens(tokens []Token) (Structogram, error) {
 			if !isKeyword(p.next().tokenType) {
 				return parsed, newTokenValueError("keyword", p.next())
 			}
-			// Discard the keyword token for now
-			p.readNext()
+			tok := p.readNext()
+			if tok.tokenType == "instruction" {
+				if p.next().tokenType != "openParentheses" {
+					return parsed, newTokenValueError(
+						"openParentheses", p.next(),
+					)
+				}
+				p.readNext()
+				if p.next().tokenType != "string" {
+					return parsed, newTokenValueError("string", p.next())
+				}
+
+				// Discard the instructions value for now
+				p.readNext()
+
+				if p.next().tokenType != "closeParentheses" {
+					return parsed, newTokenValueError(
+						"closeParentheses", p.next(),
+					)
+				}
+				p.readNext()
+			}
 
 			if p.next().tokenType != "closeBrace" {
 				return parsed, newTokenValueError("closeBrace", p.next())

@@ -171,7 +171,25 @@ func TestIfTokenHasToHaveBody(t *testing.T) {
 }
 
 func TestIfTokenCanHaveWhitespaceBetweenConditionAndBody(t *testing.T) {
-	tokens := makeTokens(`name("a")if("b")` + "\n " + `{instruction}`)
+	tokens := makeTokens(`name("a")if("b")` + "\n " + `{instruction("c")}`)
 	_, err := parseTokens(tokens)
 	checkOk(t, err)
+}
+
+func TestInstructionTokenInsideIfBodyBehavesTheSameAsOutside(t *testing.T) {
+	tokens := makeTokens(`name("a") if("b") {instruction}`)
+	_, err := parseTokens(tokens)
+	checkErrorMsg(
+		t, err, "1:31, expected 'openParentheses', but got 'closeBrace'",
+	)
+
+	tokens = makeTokens(`name("a") if("b") {instruction(}`)
+	_, err = parseTokens(tokens)
+	checkErrorMsg(t, err, "1:32, expected 'string', but got 'closeBrace'")
+
+	tokens = makeTokens(`name("a") if("b") {instruction("c"}`)
+	_, err = parseTokens(tokens)
+	checkErrorMsg(
+		t, err, "1:35, expected 'closeParentheses', but got 'closeBrace'",
+	)
 }
