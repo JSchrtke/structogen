@@ -193,3 +193,31 @@ func TestInstructionTokenInsideIfBodyBehavesTheSameAsOutside(t *testing.T) {
 		t, err, "1:35, expected 'closeParentheses', but got 'closeBrace'",
 	)
 }
+
+func TestCanParseInstructionInsideIfBody(t *testing.T) {
+	tokens := makeTokens(`name("a") if("b") {instruction("c")}`)
+	str, err := parseTokens(tokens)
+	checkOk(t, err)
+
+	if len(str.nodes) != 1 {
+		t.Errorf("Wrong node count, expected %d, but got %d", 1, len(str.nodes))
+	}
+	n := str.nodes[0]
+	if n.nodeType != "if" {
+		t.Errorf("Wronge node type, expected %s, but got %s", "if", n.nodeType)
+	}
+	if n.value != "b" {
+		t.Errorf("Wrong node value, expected %s, but got %s", "b", n.value)
+	}
+	if len(n.nodes) != 1 {
+		t.Errorf("Wrong node count, expected %d, but got %d", 1, len(n.nodes))
+	}
+	s := n.nodes[0]
+	if s.nodeType != "instruction" {
+		t.Errorf("Wronge node type, expected %s, but got %s",
+			"instruction", s.nodeType)
+	}
+	if s.value != "c" {
+		t.Errorf("Wronge node value, expected %s, but got %s", "c", s.value)
+	}
+}
