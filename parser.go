@@ -114,6 +114,7 @@ func (p *Parser) parseIf() (Node, error) {
 				)
 			}
 			p.readNext()
+
 			ifNode.nodes = append(ifNode.nodes, instructionNode)
 		case "if":
 			n, err := p.parseIf()
@@ -183,11 +184,11 @@ func parseTokens(tokens []Token) (Structogram, error) {
 			// Whitespace should be completely ignored
 			_ = p.readNext()
 		case "if":
-			n, err := p.parseIf()
+			ifNode, err := p.parseIf()
 			if err != nil {
 				return parsed, err
 			}
-			parsed.nodes = append(parsed.nodes, n)
+			parsed.nodes = append(parsed.nodes, ifNode)
 		case "invalid":
 			return parsed, newTokenValueError("identifier", p.next())
 		case "EOF":
