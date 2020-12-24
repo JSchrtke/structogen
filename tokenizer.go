@@ -31,18 +31,6 @@ func (t *Tokenizer) isNextWhitespace() bool {
 		string(t.next()) == "\n"
 }
 
-func (t *Tokenizer) makeWhitespaceToken(tokenValue string) Token {
-	for !t.isEof() && t.isNextWhitespace() {
-		tokenValue += string(t.readNext())
-	}
-	return Token{
-		tokenType: "whitespace",
-		value:     tokenValue,
-		line:      t.currentLineNumber,
-		column:    t.currentColumnNumber,
-	}
-}
-
 func (t *Tokenizer) emitToken(tokenType string) {
 	v := string(t.runes)
 	if tokenType == "EOF" {
@@ -84,6 +72,8 @@ func makeTokens(s string) []Token {
 			t.emitToken("openBrace")
 		case "}":
 			t.emitToken("closeBrace")
+		case "instruction":
+			t.emitToken("instruction")
 		case `"`, "'":
 			quot := string(t.runes)
 			str := ""
@@ -109,8 +99,6 @@ func makeTokens(s string) []Token {
 			// correct.
 			t.currentColumnNumber += len(str) + 2
 			t.runes = nil
-		case "instruction":
-			t.emitToken("instruction")
 		case " ", "\t", "\n":
 			for !t.isEof() && t.isNextWhitespace() {
 				t.runes = append(t.runes, t.readNext())
