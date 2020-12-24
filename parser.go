@@ -180,8 +180,6 @@ func parseTokens(tokens []Token) (Structogram, error) {
 
 			parsed.nodes = append(parsed.nodes, instructionNode)
 		case "whitespace":
-			// TODO Maybe have a function that runs once that strips all the
-			// whitespace out of the tokens?
 			// Whitespace should be completely ignored
 			_ = p.readNext()
 		case "if":
