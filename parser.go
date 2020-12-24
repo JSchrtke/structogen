@@ -55,75 +55,82 @@ func isKeyword(s string) bool {
 	return s == "instruction" || s == "if"
 }
 
-func (p *Parser) parseIf(parsed Structogram) ([]Node, error) {
+func (p *Parser) parseIf() (Node, error) {
 	var nodes []Node
 	var ifNode Node
 
 	ifNode.nodeType = p.readNext().value
 	if p.next().tokenType != "openParentheses" {
-		return nil, newTokenValueError("openParentheses", p.next())
+		return ifNode, newTokenValueError("openParentheses", p.next())
 	}
 	// Discard the openParentheses
 	p.readNext()
 
 	if p.next().tokenType != "string" {
-		return nil, newTokenValueError("string", p.next())
+		return ifNode, newTokenValueError("string", p.next())
 	}
 	ifNode.value = p.readNext().value
 
 	if p.next().tokenType != "closeParentheses" {
-		return nil, newTokenValueError("closeParentheses", p.next())
+		return ifNode, newTokenValueError("closeParentheses", p.next())
 	}
 	p.readNext()
 	if p.next().tokenType == "whitespace" {
 		p.readNext()
 	}
 	if p.next().tokenType != "openBrace" {
-		return nil, newTokenValueError("openBrace", p.next())
+		return ifNode, newTokenValueError("openBrace", p.next())
 	}
 	p.readNext()
 
 	if !isKeyword(p.next().tokenType) {
-		return nil, newTokenValueError("keyword", p.next())
+		return ifNode, newTokenValueError("keyword", p.next())
 	}
 
 	// Parsing of the if body
+	var err error
 	for p.next().tokenType != "closeBrace" {
-		tok := p.readNext()
-		switch tok.tokenType {
+		switch p.next().tokenType {
+		case "whitespace":
+			p.readNext()
 		case "instruction":
 			var instructionNode Node
-			instructionNode.nodeType = tok.tokenType
+			instructionNode.nodeType = p.readNext().tokenType
 
 			if p.next().tokenType != "openParentheses" {
-				return nil, newTokenValueError(
+				return ifNode, newTokenValueError(
 					"openParentheses", p.next(),
 				)
 			}
 			p.readNext()
 
 			if p.next().tokenType != "string" {
-				return nil, newTokenValueError("string", p.next())
+				return ifNode, newTokenValueError("string", p.next())
 			}
 			instructionNode.value = p.readNext().value
 
 			if p.next().tokenType != "closeParentheses" {
-				return nil, newTokenValueError(
+				return ifNode, newTokenValueError(
 					"closeParentheses", p.next(),
 				)
 			}
 			p.readNext()
 			ifNode.nodes = append(ifNode.nodes, instructionNode)
+		case "if":
+			n, err := p.parseIf()
+			if err != nil {
+				return n, err
+			}
+			ifNode.nodes = append(ifNode.nodes, n)
 		}
 	}
 
 	if p.next().tokenType != "closeBrace" {
-		return nil, newTokenValueError("closeBrace", p.next())
+		return ifNode, newTokenValueError("closeBrace", p.next())
 	}
 	p.readNext()
-	var err error
 	nodes = append(nodes, ifNode)
-	return nodes, err
+	return ifNode, err
 }
 
 func parseTokens(tokens []Token) (Structogram, error) {
@@ -173,10 +180,11 @@ func parseTokens(tokens []Token) (Structogram, error) {
 			// Whitespace should be completely ignored
 			_ = p.readNext()
 		case "if":
-			parsed.nodes, err = p.parseIf(parsed)
+			n, err := p.parseIf()
 			if err != nil {
 				return parsed, err
 			}
+			parsed.nodes = append(parsed.nodes, n)
 		case "invalid":
 			return parsed, newTokenValueError("identifier", p.next())
 		case "EOF":

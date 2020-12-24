@@ -211,7 +211,7 @@ func TestCanParseMultipleInstructionsInsideIfBody(t *testing.T) {
 	}
 	ifBody := ifNode.nodes
 	if len(ifBody) != 2 {
-		t.Errorf("Wrong node count, expected %d, but got %d", 1, len(ifNode.nodes))
+		t.Errorf("Wrong node count, expected %d, but got %d", 2, len(ifNode.nodes))
 	}
 	instructionNode := ifBody[0]
 	if instructionNode.nodeType != "instruction" {
@@ -228,5 +228,68 @@ func TestCanParseMultipleInstructionsInsideIfBody(t *testing.T) {
 	}
 	if instructionNode.value != "d" {
 		t.Errorf("Wronge node value, expected %s, but got %s", "d", instructionNode.value)
+	}
+}
+
+func TestCanParseNestedIfs(t *testing.T) {
+	tokens := makeTokens(`name("a") if("b") {if("c"){instruction("d")}}`)
+	structogram, err := parseTokens(tokens)
+	checkOk(t, err)
+
+	if len(structogram.nodes) != 1 {
+		t.Errorf("Wrong node count, expected %d, but got %d",
+			1,
+			len(structogram.nodes),
+		)
+	}
+
+	// first if
+	ifNode := structogram.nodes[0]
+	if ifNode.nodeType != "if" {
+		t.Errorf("Wrong node type, expected %s, but got %s",
+			"if",
+			ifNode.nodeType,
+		)
+	}
+	if ifNode.value != "b" {
+		t.Errorf("Wrong node value, expected %s, but got %s", "b", ifNode.value)
+	}
+	ifBody := ifNode.nodes
+	if len(ifBody) != 1 {
+		t.Errorf("Wrong node count, expected %d, but got %d",
+			1,
+			len(structogram.nodes),
+		)
+	}
+
+	// nested if
+	ifNode = ifBody[0]
+	if ifNode.nodeType != "if" {
+		t.Errorf("Wrong node type, expected %s, but got %s",
+			"if",
+			ifNode.nodeType,
+		)
+	}
+	if ifNode.value != "c" {
+		t.Errorf("Wrong node value, expected %s, but got %s", "c", ifNode.value)
+	}
+	ifBody = ifNode.nodes
+	if len(ifBody) != 1 {
+		t.Errorf(
+			"Wrong node count, expected %d, but got %d",
+			1,
+			len(structogram.nodes),
+		)
+	}
+	instructionNode := ifBody[0]
+	if instructionNode.nodeType != "instruction" {
+		t.Errorf(
+			"Wrong node type, expected %s, but got %s",
+			"instruction",
+			instructionNode.nodeType,
+		)
+	}
+	if instructionNode.value != "d" {
+		t.Errorf("Wrong node value, expected %s, but got %s", "d", ifNode.value)
 	}
 }
