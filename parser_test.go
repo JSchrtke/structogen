@@ -43,13 +43,13 @@ func checkNode(t *testing.T, n Node, nodeType string, value string) {
 
 func TestEmptyStructogramNameCausesError(t *testing.T) {
 	tokens := makeTokens("name()")
-	_, err := parseTokens(tokens)
+	_, err := parseStructogram(tokens)
 	checkErrorMsg(t, err, "1:6, expected 'string', but got 'closeParentheses'")
 }
 
 func TestStructogramsHaveNames(t *testing.T) {
 	tokens := makeTokens(`name("test name")`)
-	structogram, err := parseTokens(tokens)
+	structogram, err := parseStructogram(tokens)
 	checkOk(t, err)
 
 	if structogram.name != "test name" {
@@ -62,52 +62,52 @@ func TestStructogramsHaveNames(t *testing.T) {
 
 func TestNamesCanNotBeNested(t *testing.T) {
 	tokens := makeTokens("name(name())")
-	_, err := parseTokens(tokens)
+	_, err := parseStructogram(tokens)
 	checkErrorMsg(t, err, "1:6, expected 'string', but got 'name'")
 }
 
 func TestNameHasToBeFirstToken(t *testing.T) {
 	tokens := makeTokens(`instruction("something")name("a name")`)
-	_, err := parseTokens(tokens)
+	_, err := parseStructogram(tokens)
 	checkErrorMsg(t, err, "1:1, expected 'name', but got 'instruction'")
 }
 
 func TestNameValueHasToBeEnclosedByParentheses(t *testing.T) {
 
 	tokens := makeTokens(`name"a name"`)
-	_, err := parseTokens(tokens)
+	_, err := parseStructogram(tokens)
 	checkErrorMsg(t, err, "1:5, expected 'openParentheses', but got 'string'")
 
 	tokens = makeTokens(`name("a"(`)
-	_, err = parseTokens(tokens)
+	_, err = parseStructogram(tokens)
 	checkErrorMsg(t, err, "1:9, expected 'closeParentheses', but got 'openParentheses'")
 }
 
 func TestInstructionValueHasToBeEnclosedByParentheses(t *testing.T) {
 	tokens := makeTokens(`name("some name")instruction"something")`)
-	_, err := parseTokens(tokens)
+	_, err := parseStructogram(tokens)
 	checkErrorMsg(t, err, "1:29, expected 'openParentheses', but got 'string'")
 
 	tokens = makeTokens(`name("a")instruction("b"(`)
-	_, err = parseTokens(tokens)
+	_, err = parseStructogram(tokens)
 	checkErrorMsg(t, err, "1:25, expected 'closeParentheses', but got 'openParentheses'")
 }
 
 func TestInstructionsCanNotBeEmpty(t *testing.T) {
 	tokens := makeTokens(`name("test structogram")instruction()`)
-	_, err := parseTokens(tokens)
+	_, err := parseStructogram(tokens)
 	checkErrorMsg(t, err, "1:37, expected 'string', but got 'closeParentheses'")
 }
 
 func TestInstuctionsCanNotBeNested(t *testing.T) {
 	tokens := makeTokens(`name("a")instruction(instruction())`)
-	_, err := parseTokens(tokens)
+	_, err := parseStructogram(tokens)
 	checkErrorMsg(t, err, "1:22, expected 'string', but got 'instruction'")
 }
 
 func TestStructogramCanHaveInstructions(t *testing.T) {
 	tokens := makeTokens(`name("a")instruction("something")`)
-	structogram, err := parseTokens(tokens)
+	structogram, err := parseStructogram(tokens)
 	checkOk(t, err)
 	checkNodeCount(t, structogram.nodes, 1)
 	checkNode(t, structogram.nodes[0], "instruction", "something")
@@ -115,7 +115,7 @@ func TestStructogramCanHaveInstructions(t *testing.T) {
 
 func TestStructogramsCanHaveMultipleInstructions(t *testing.T) {
 	tokens := makeTokens(`name("a")instruction("b")instruction("c")`)
-	structogram, err := parseTokens(tokens)
+	structogram, err := parseStructogram(tokens)
 	checkOk(t, err)
 	checkNodeCount(t, structogram.nodes, 2)
 	checkNode(t, structogram.nodes[0], "instruction", "b")
@@ -124,35 +124,35 @@ func TestStructogramsCanHaveMultipleInstructions(t *testing.T) {
 
 func TestParserCanHandleInvalidTokens(t *testing.T) {
 	tokens := makeTokens(`name("a")asd`)
-	_, err := parseTokens(tokens)
+	_, err := parseStructogram(tokens)
 	checkErrorMsg(t, err, "1:10, expected 'identifier', but got 'invalid'")
 }
 
 func TestParserIgnoresWhitespaceTokens(t *testing.T) {
 	tokens := makeTokens(`name("a")` + "\n " + `instruction("b")`)
-	_, err := parseTokens(tokens)
+	_, err := parseStructogram(tokens)
 	checkOk(t, err)
 }
 
 func TestIfTokenValuesAreEnclosedByParentheses(t *testing.T) {
 	tokens := makeTokens(`name("a")if"b")`)
-	_, err := parseTokens(tokens)
+	_, err := parseStructogram(tokens)
 	checkErrorMsg(t, err, "1:12, expected 'openParentheses', but got 'string'")
 
 	tokens = makeTokens(`name("a")if("b"`)
-	_, err = parseTokens(tokens)
+	_, err = parseStructogram(tokens)
 	checkErrorMsg(t, err, "1:16, expected 'closeParentheses', but got 'EOF'")
 }
 
 func TestIfTokenValueCanNotBeEmpty(t *testing.T) {
 	tokens := makeTokens(`name("a")if()`)
-	_, err := parseTokens(tokens)
+	_, err := parseStructogram(tokens)
 	checkErrorMsg(t, err, "1:13, expected 'string', but got 'closeParentheses'")
 }
 
 func TestIfTokenHasToHaveBody(t *testing.T) {
 	tokens := makeTokens(`name("a")if("b")`)
-	_, err := parseTokens(tokens)
+	_, err := parseStructogram(tokens)
 	checkErrorMsg(t, err, "1:17, expected 'openBrace', but got 'EOF'")
 
 	// The only valid tokens inside of an if-body are keywords or whitespace.
@@ -161,37 +161,37 @@ func TestIfTokenHasToHaveBody(t *testing.T) {
 	// The only exception are openParentheses, which are legal if they
 	// are preceeded by a keyword
 	tokens = makeTokens(`name("a")if("b"){`)
-	_, err = parseTokens(tokens)
+	_, err = parseStructogram(tokens)
 	checkErrorMsg(t, err, "1:18, expected 'keyword', but got 'EOF'")
 
 	tokens = makeTokens(`name("a")if("b"){"c"`)
-	_, err = parseTokens(tokens)
+	_, err = parseStructogram(tokens)
 	checkErrorMsg(t, err, "1:18, expected 'keyword', but got 'string'")
 
 	tokens = makeTokens(`name("a")if("b"){name}`)
-	_, err = parseTokens(tokens)
+	_, err = parseStructogram(tokens)
 	checkErrorMsg(t, err, "1:18, expected 'keyword', but got 'name'")
 }
 
 func TestIfTokenCanHaveWhitespaceBetweenConditionAndBody(t *testing.T) {
 	tokens := makeTokens(`name("a")if("b")` + "\n " + `{instruction("c")}`)
-	_, err := parseTokens(tokens)
+	_, err := parseStructogram(tokens)
 	checkOk(t, err)
 }
 
 func TestInstructionTokenInsideIfBodyBehavesTheSameAsOutside(t *testing.T) {
 	tokens := makeTokens(`name("a") if("b") {instruction}`)
-	_, err := parseTokens(tokens)
+	_, err := parseStructogram(tokens)
 	checkErrorMsg(
 		t, err, "1:31, expected 'openParentheses', but got 'closeBrace'",
 	)
 
 	tokens = makeTokens(`name("a") if("b") {instruction(}`)
-	_, err = parseTokens(tokens)
+	_, err = parseStructogram(tokens)
 	checkErrorMsg(t, err, "1:32, expected 'string', but got 'closeBrace'")
 
 	tokens = makeTokens(`name("a") if("b") {instruction("c"}`)
-	_, err = parseTokens(tokens)
+	_, err = parseStructogram(tokens)
 	checkErrorMsg(
 		t, err, "1:35, expected 'closeParentheses', but got 'closeBrace'",
 	)
@@ -199,7 +199,7 @@ func TestInstructionTokenInsideIfBodyBehavesTheSameAsOutside(t *testing.T) {
 
 func TestCanParseMultipleInstructionsInsideIfBody(t *testing.T) {
 	tokens := makeTokens(`name("a") if("b") {instruction("c") instruction("d")}`)
-	structogram, err := parseTokens(tokens)
+	structogram, err := parseStructogram(tokens)
 	checkOk(t, err)
 
 	checkNodeCount(t, structogram.nodes, 1)
@@ -217,7 +217,7 @@ func TestCanParseMultipleInstructionsInsideIfBody(t *testing.T) {
 
 func TestCanParseNestedIfs(t *testing.T) {
 	tokens := makeTokens(`name("a") if("b") {if("c"){instruction("d")}}`)
-	structogram, err := parseTokens(tokens)
+	structogram, err := parseStructogram(tokens)
 	checkOk(t, err)
 
 	checkNodeCount(t, structogram.nodes, 1)
