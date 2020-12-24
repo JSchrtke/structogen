@@ -30,6 +30,17 @@ func checkNodeCount(t *testing.T, n []Node, count int) {
 	}
 }
 
+func checkNode(t *testing.T, n Node, nodeType string, value string) {
+	if n.nodeType != nodeType {
+		t.Errorf(
+			"Wrong node type, expected %s, but got %s", nodeType, n.nodeType,
+		)
+	}
+	if n.value != value {
+		t.Errorf("Wrong node value, expected %s, but got %s", value, n.value)
+	}
+}
+
 func TestEmptyStructogramNameCausesError(t *testing.T) {
 	tokens := makeTokens("name()")
 	_, err := parseTokens(tokens)
@@ -99,17 +110,7 @@ func TestStructogramCanHaveInstructions(t *testing.T) {
 	structogram, err := parseTokens(tokens)
 	checkOk(t, err)
 	checkNodeCount(t, structogram.nodes, 1)
-	instructionNode := structogram.nodes[0]
-	if instructionNode.nodeType != "instruction" {
-		t.Errorf("Wrong node type, expected %s, but got %s",
-			"instruction", instructionNode.nodeType,
-		)
-	}
-	if instructionNode.value != "something" {
-		t.Errorf("Wrong node value, expected %s, but got %s",
-			"something", instructionNode.value,
-		)
-	}
+	checkNode(t, structogram.nodes[0], "instruction", "something")
 }
 
 func TestStructogramsCanHaveMultipleInstructions(t *testing.T) {
@@ -117,34 +118,13 @@ func TestStructogramsCanHaveMultipleInstructions(t *testing.T) {
 	structogram, err := parseTokens(tokens)
 	checkOk(t, err)
 	checkNodeCount(t, structogram.nodes, 2)
-	instructionNode := structogram.nodes[0]
-	if instructionNode.nodeType != "instruction" {
-		t.Errorf("Wrong node type, expected %s, but got %s",
-			"instruction", instructionNode.nodeType,
-		)
-	}
-	if instructionNode.value != "b" {
-		t.Errorf("Wrong node value, expected %s, but got %s",
-			"b", instructionNode.value,
-		)
-	}
-	instructionNode = structogram.nodes[1]
-	if instructionNode.nodeType != "instruction" {
-		t.Errorf("Wrong node type, expected %s, but got %s",
-			"instruction", instructionNode.nodeType,
-		)
-	}
-	if instructionNode.value != "c" {
-		t.Errorf("Wrong node value, expected %s, but got %s",
-			"c", instructionNode.value,
-		)
-	}
+	checkNode(t, structogram.nodes[0], "instruction", "b")
+	checkNode(t, structogram.nodes[1], "instruction", "c")
 }
 
 func TestParserCanHandleInvalidTokens(t *testing.T) {
 	tokens := makeTokens(`name("a")asd`)
 	_, err := parseTokens(tokens)
-	// TODO it's not called 'identifier', it's actually a keyword
 	checkErrorMsg(t, err, "1:10, expected 'identifier', but got 'invalid'")
 }
 
@@ -224,31 +204,15 @@ func TestCanParseMultipleInstructionsInsideIfBody(t *testing.T) {
 
 	checkNodeCount(t, structogram.nodes, 1)
 	ifNode := structogram.nodes[0]
-	if ifNode.nodeType != "if" {
-		t.Errorf("Wronge node type, expected %s, but got %s", "if", ifNode.nodeType)
-	}
-	if ifNode.value != "b" {
-		t.Errorf("Wrong node value, expected %s, but got %s", "b", ifNode.value)
-	}
+	checkNode(t, ifNode, "if", "b")
 
 	ifBody := ifNode.nodes
 	checkNodeCount(t, ifBody, 2)
 	instructionNode := ifBody[0]
-	if instructionNode.nodeType != "instruction" {
-		t.Errorf("Wronge node type, expected %s, but got %s",
-			"instruction", instructionNode.nodeType)
-	}
-	if instructionNode.value != "c" {
-		t.Errorf("Wronge node value, expected %s, but got %s", "c", instructionNode.value)
-	}
+	checkNode(t, instructionNode, "instruction", "c")
+
 	instructionNode = ifBody[1]
-	if instructionNode.nodeType != "instruction" {
-		t.Errorf("Wronge node type, expected %s, but got %s",
-			"instruction", instructionNode.nodeType)
-	}
-	if instructionNode.value != "d" {
-		t.Errorf("Wronge node value, expected %s, but got %s", "d", instructionNode.value)
-	}
+	checkNode(t, instructionNode, "instruction", "d")
 }
 
 func TestCanParseNestedIfs(t *testing.T) {
@@ -257,43 +221,16 @@ func TestCanParseNestedIfs(t *testing.T) {
 	checkOk(t, err)
 
 	checkNodeCount(t, structogram.nodes, 1)
-
-	// first if
 	ifNode := structogram.nodes[0]
-	if ifNode.nodeType != "if" {
-		t.Errorf("Wrong node type, expected %s, but got %s",
-			"if",
-			ifNode.nodeType,
-		)
-	}
-	if ifNode.value != "b" {
-		t.Errorf("Wrong node value, expected %s, but got %s", "b", ifNode.value)
-	}
+	checkNode(t, ifNode, "if", "b")
+
 	ifBody := ifNode.nodes
 	checkNodeCount(t, ifBody, 1)
 
-	// nested if
-	ifNode = ifBody[0]
-	if ifNode.nodeType != "if" {
-		t.Errorf("Wrong node type, expected %s, but got %s",
-			"if",
-			ifNode.nodeType,
-		)
-	}
-	if ifNode.value != "c" {
-		t.Errorf("Wrong node value, expected %s, but got %s", "c", ifNode.value)
-	}
-	ifBody = ifNode.nodes
-	checkNodeCount(t, ifBody, 1)
-	instructionNode := ifBody[0]
-	if instructionNode.nodeType != "instruction" {
-		t.Errorf(
-			"Wrong node type, expected %s, but got %s",
-			"instruction",
-			instructionNode.nodeType,
-		)
-	}
-	if instructionNode.value != "d" {
-		t.Errorf("Wrong node value, expected %s, but got %s", "d", ifNode.value)
-	}
+	nestedIf := ifBody[0]
+	checkNode(t, nestedIf, "if", "c")
+
+	nestedIfBody := nestedIf.nodes
+	checkNodeCount(t, nestedIfBody, 1)
+	checkNode(t, nestedIfBody[0], "instruction", "d")
 }
