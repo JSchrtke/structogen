@@ -13,9 +13,8 @@ type Token struct {
 }
 
 type Structogram struct {
-	name         string
-	instructions []string
-	nodes        []Node
+	name  string
+	nodes []Node
 }
 
 type Node struct {
@@ -161,19 +160,25 @@ func parseTokens(tokens []Token) (Structogram, error) {
 			}
 			_ = p.readNext()
 		case "instruction":
-			_ = p.readNext()
+			var instructionNode Node
+			instructionNode.nodeType = p.readNext().tokenType
+
 			if p.next().tokenType != "openParentheses" {
 				return parsed, newTokenValueError("openParentheses", p.next())
 			}
-			_ = p.readNext()
+			p.readNext()
+
 			if p.next().tokenType != "string" {
 				return parsed, newTokenValueError("string", p.next())
 			}
-			parsed.instructions = append(parsed.instructions, p.readNext().value)
+			instructionNode.value = p.readNext().value
+
 			if p.next().tokenType != "closeParentheses" {
 				return parsed, newTokenValueError("closeParentheses", p.next())
 			}
-			_ = p.readNext()
+			p.readNext()
+
+			parsed.nodes = append(parsed.nodes, instructionNode)
 		case "whitespace":
 			// TODO Maybe have a function that runs once that strips all the
 			// whitespace out of the tokens?
