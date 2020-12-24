@@ -88,33 +88,33 @@ func (p *Parser) parseIf(parsed Structogram) ([]Node, error) {
 	}
 
 	// Parsing of the if body
-	tok := p.readNext()
-	// TODO Loop through tokens, until either EOF, or close Brace token.
-	// Implement this in individual tests to insure that all functions
-	// correctly.
-	if tok.tokenType == "instruction" {
-		var instructionNode Node
-		instructionNode.nodeType = tok.tokenType
+	for p.next().tokenType != "closeBrace" {
+		tok := p.readNext()
+		switch tok.tokenType {
+		case "instruction":
+			var instructionNode Node
+			instructionNode.nodeType = tok.tokenType
 
-		if p.next().tokenType != "openParentheses" {
-			return nil, newTokenValueError(
-				"openParentheses", p.next(),
-			)
-		}
-		p.readNext()
+			if p.next().tokenType != "openParentheses" {
+				return nil, newTokenValueError(
+					"openParentheses", p.next(),
+				)
+			}
+			p.readNext()
 
-		if p.next().tokenType != "string" {
-			return nil, newTokenValueError("string", p.next())
-		}
-		instructionNode.value = p.readNext().value
+			if p.next().tokenType != "string" {
+				return nil, newTokenValueError("string", p.next())
+			}
+			instructionNode.value = p.readNext().value
 
-		if p.next().tokenType != "closeParentheses" {
-			return nil, newTokenValueError(
-				"closeParentheses", p.next(),
-			)
+			if p.next().tokenType != "closeParentheses" {
+				return nil, newTokenValueError(
+					"closeParentheses", p.next(),
+				)
+			}
+			p.readNext()
+			ifNode.nodes = append(ifNode.nodes, instructionNode)
 		}
-		p.readNext()
-		ifNode.nodes = append(ifNode.nodes, instructionNode)
 	}
 
 	if p.next().tokenType != "closeBrace" {

@@ -194,30 +194,39 @@ func TestInstructionTokenInsideIfBodyBehavesTheSameAsOutside(t *testing.T) {
 	)
 }
 
-func TestCanParseInstructionInsideIfBody(t *testing.T) {
-	tokens := makeTokens(`name("a") if("b") {instruction("c")}`)
-	str, err := parseTokens(tokens)
+func TestCanParseMultipleInstructionsInsideIfBody(t *testing.T) {
+	tokens := makeTokens(`name("a") if("b") {instruction("c") instruction("d")}`)
+	structogram, err := parseTokens(tokens)
 	checkOk(t, err)
 
-	if len(str.nodes) != 1 {
-		t.Errorf("Wrong node count, expected %d, but got %d", 1, len(str.nodes))
+	if len(structogram.nodes) != 1 {
+		t.Errorf("Wrong node count, expected %d, but got %d", 1, len(structogram.nodes))
 	}
-	n := str.nodes[0]
-	if n.nodeType != "if" {
-		t.Errorf("Wronge node type, expected %s, but got %s", "if", n.nodeType)
+	ifNode := structogram.nodes[0]
+	if ifNode.nodeType != "if" {
+		t.Errorf("Wronge node type, expected %s, but got %s", "if", ifNode.nodeType)
 	}
-	if n.value != "b" {
-		t.Errorf("Wrong node value, expected %s, but got %s", "b", n.value)
+	if ifNode.value != "b" {
+		t.Errorf("Wrong node value, expected %s, but got %s", "b", ifNode.value)
 	}
-	if len(n.nodes) != 1 {
-		t.Errorf("Wrong node count, expected %d, but got %d", 1, len(n.nodes))
+	ifBody := ifNode.nodes
+	if len(ifBody) != 2 {
+		t.Errorf("Wrong node count, expected %d, but got %d", 1, len(ifNode.nodes))
 	}
-	s := n.nodes[0]
-	if s.nodeType != "instruction" {
+	instructionNode := ifBody[0]
+	if instructionNode.nodeType != "instruction" {
 		t.Errorf("Wronge node type, expected %s, but got %s",
-			"instruction", s.nodeType)
+			"instruction", instructionNode.nodeType)
 	}
-	if s.value != "c" {
-		t.Errorf("Wronge node value, expected %s, but got %s", "c", s.value)
+	if instructionNode.value != "c" {
+		t.Errorf("Wronge node value, expected %s, but got %s", "c", instructionNode.value)
+	}
+	instructionNode = ifBody[1]
+	if instructionNode.nodeType != "instruction" {
+		t.Errorf("Wronge node type, expected %s, but got %s",
+			"instruction", instructionNode.nodeType)
+	}
+	if instructionNode.value != "d" {
+		t.Errorf("Wronge node value, expected %s, but got %s", "d", instructionNode.value)
 	}
 }
