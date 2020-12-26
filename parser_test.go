@@ -264,3 +264,24 @@ func TestCanParseElse(t *testing.T) {
 	checkNodeCount(t, elseBody, 1)
 	checkNode(t, elseBody[0], "instruction", "d")
 }
+
+func TestCanParseCall(t *testing.T) {
+	tokens := makeTokens(`name("a") call`)
+	_, err := parseStructogram(tokens)
+	checkErrorMsg(t, err, "1:15, expected 'openParentheses', but got 'EOF'")
+
+	tokens = makeTokens(`name("a") call(`)
+	_, err = parseStructogram(tokens)
+	checkErrorMsg(t, err, "1:16, expected 'string', but got 'EOF'")
+
+	tokens = makeTokens(`name("a") call("b"`)
+	_, err = parseStructogram(tokens)
+	checkErrorMsg(t, err, "1:19, expected 'closeParentheses', but got 'EOF'")
+
+	tokens = makeTokens(`name("a") call("b")`)
+	structogram, err := parseStructogram(tokens)
+	checkOk(t, err)
+
+	checkNodeCount(t, structogram.nodes, 1)
+	checkNode(t, structogram.nodes[0], "call", "b")
+}

@@ -66,9 +66,9 @@ func (p *Parser) parseTokensUntil(delimiter string) ([]Node, error) {
 			p.readNext()
 		case "invalid":
 			return nodes, newTokenValueError("keyword", p.next())
-		case "instruction":
-			var instructionNode Node
-			instructionNode.nodeType = p.readNext().tokenType
+		case "instruction", "call":
+			var n Node
+			n.nodeType = p.readNext().tokenType
 
 			if p.next().tokenType != "openParentheses" {
 				return nodes, newTokenValueError("openParentheses", p.next())
@@ -78,14 +78,14 @@ func (p *Parser) parseTokensUntil(delimiter string) ([]Node, error) {
 			if p.next().tokenType != "string" {
 				return nodes, newTokenValueError("string", p.next())
 			}
-			instructionNode.value = p.readNext().value
+			n.value = p.readNext().value
 
 			if p.next().tokenType != "closeParentheses" {
 				return nodes, newTokenValueError("closeParentheses", p.next())
 			}
 			p.readNext()
 
-			nodes = append(nodes, instructionNode)
+			nodes = append(nodes, n)
 		case "if":
 			ifNode, err := p.parseIf()
 			if err != nil {
