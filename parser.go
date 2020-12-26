@@ -65,7 +65,7 @@ func (p *Parser) parseTokensUntil(delimiter string) ([]Node, error) {
 		case "whitespace":
 			p.readNext()
 		case "invalid":
-			return nodes, newTokenValueError("identifier", p.next())
+			return nodes, newTokenValueError("keyword", p.next())
 		case "instruction":
 			var instructionNode Node
 			instructionNode.nodeType = p.readNext().tokenType

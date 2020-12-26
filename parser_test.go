@@ -125,7 +125,7 @@ func TestStructogramsCanHaveMultipleInstructions(t *testing.T) {
 func TestParserCanHandleInvalidTokens(t *testing.T) {
 	tokens := makeTokens(`name("a")asd`)
 	_, err := parseStructogram(tokens)
-	checkErrorMsg(t, err, "1:10, expected 'identifier', but got 'invalid'")
+	checkErrorMsg(t, err, "1:10, expected 'keyword', but got 'invalid'")
 }
 
 func TestParserIgnoresWhitespaceTokens(t *testing.T) {
