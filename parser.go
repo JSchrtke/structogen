@@ -60,6 +60,8 @@ func (p *Parser) parseTokensUntil(delimiter string) ([]Node, error) {
 
 	for p.next().tokenType != delimiter {
 		switch p.next().tokenType {
+		case "EOF":
+			return nodes, newTokenValueError(delimiter, p.next())
 		case "whitespace":
 			p.readNext()
 		case "invalid":
@@ -85,16 +87,31 @@ func (p *Parser) parseTokensUntil(delimiter string) ([]Node, error) {
 
 			nodes = append(nodes, instructionNode)
 		case "if":
-			n, err := p.parseIf()
+			ifNode, err := p.parseIf()
 			if err != nil {
 				return nodes, err
 			}
-			nodes = append(nodes, n)
+			nodes = append(nodes, ifNode)
+
+			if p.next().tokenType == "whitespace" {
+				p.readNext()
+			}
+			if p.next().tokenType == "else" {
+				elseNode, err := p.parseElse()
+				if err != nil {
+					return nodes, err
+				}
+				nodes = append(nodes, elseNode)
+			}
 		case "else":
 			return nodes, newTokenValueError("statement", p.next())
 		}
 	}
+	if p.next().tokenType != delimiter {
+		return nodes, newTokenValueError(delimiter, p.next())
+	}
 	p.readNext()
+
 	return nodes, err
 }
 
@@ -120,6 +137,8 @@ func (p *Parser) parseIf() (Node, error) {
 	if p.next().tokenType == "whitespace" {
 		p.readNext()
 	}
+
+	// Parsing of the if body
 	if p.next().tokenType != "openBrace" {
 		return ifNode, newTokenValueError("openBrace", p.next())
 	}
@@ -128,11 +147,30 @@ func (p *Parser) parseIf() (Node, error) {
 	if !isKeyword(p.next().tokenType) {
 		return ifNode, newTokenValueError("keyword", p.next())
 	}
+	ifBody, err := p.parseTokensUntil("closeBrace")
+	ifNode.nodes = ifBody
 
-	// Parsing of the if body
-	nodes, err := p.parseTokensUntil("closeBrace")
-	ifNode.nodes = nodes
 	return ifNode, err
+}
+
+func (p *Parser) parseElse() (Node, error) {
+	var elseNode Node
+
+	elseNode.nodeType = p.readNext().tokenType
+	if p.next().tokenType == "whitespace" {
+		p.readNext()
+	}
+	if p.next().tokenType != "openBrace" {
+		return elseNode, newTokenValueError("openBrace", p.next())
+	}
+	p.readNext()
+	if !isKeyword(p.next().tokenType) {
+		return elseNode, newTokenValueError("keyword", p.next())
+	}
+	elseBody, err := p.parseTokensUntil("closeBrace")
+	elseNode.nodes = elseBody
+
+	return elseNode, err
 }
 
 func parseStructogram(tokens []Token) (Structogram, error) {

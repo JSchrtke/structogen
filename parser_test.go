@@ -240,3 +240,21 @@ func TestElseWithoutIfCausesError(t *testing.T) {
 	_, err := parseStructogram(tokens)
 	checkErrorMsg(t, err, "1:11, expected 'statement', but got 'else'")
 }
+
+func TestCanParseElse(t *testing.T) {
+	tokens := makeTokens(
+		`name("a") if("b") {instruction("c")} else {instruction("d")}`,
+	)
+	structogram, err := parseStructogram(tokens)
+	checkOk(t, err)
+
+	checkNodeCount(t, structogram.nodes, 2)
+
+	elseNode := structogram.nodes[1]
+	checkNode(t, elseNode, "else", "")
+	checkNodeCount(t, elseNode.nodes, 1)
+
+	elseBody := elseNode.nodes
+	checkNodeCount(t, elseBody, 1)
+	checkNode(t, elseBody[0], "instruction", "d")
+}
