@@ -80,7 +80,9 @@ func TestNameValueHasToBeEnclosedByParentheses(t *testing.T) {
 
 	tokens = makeTokens(`name("a"(`)
 	_, err = parseStructogram(tokens)
-	checkErrorMsg(t, err, "1:9, expected 'closeParentheses', but got 'openParentheses'")
+	checkErrorMsg(
+		t, err, "1:9, expected 'closeParentheses', but got 'openParentheses'",
+	)
 }
 
 func TestInstructionValueHasToBeEnclosedByParentheses(t *testing.T) {
@@ -90,7 +92,9 @@ func TestInstructionValueHasToBeEnclosedByParentheses(t *testing.T) {
 
 	tokens = makeTokens(`name("a")instruction("b"(`)
 	_, err = parseStructogram(tokens)
-	checkErrorMsg(t, err, "1:25, expected 'closeParentheses', but got 'openParentheses'")
+	checkErrorMsg(
+		t, err, "1:25, expected 'closeParentheses', but got 'openParentheses'",
+	)
 }
 
 func TestInstructionsCanNotBeEmpty(t *testing.T) {
@@ -198,7 +202,9 @@ func TestInstructionTokenInsideIfBodyBehavesTheSameAsOutside(t *testing.T) {
 }
 
 func TestCanParseMultipleInstructionsInsideIfBody(t *testing.T) {
-	tokens := makeTokens(`name("a") if("b") {instruction("c") instruction("d")}`)
+	tokens := makeTokens(
+		`name("a") if("b") {instruction("c") instruction("d")}`,
+	)
 	structogram, err := parseStructogram(tokens)
 	checkOk(t, err)
 
