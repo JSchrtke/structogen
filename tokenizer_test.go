@@ -18,7 +18,7 @@ func checkTokenType(t *testing.T, token Token, typeString string) {
 	t.Helper()
 	if token.tokenType != typeString {
 		t.Errorf(fmt.Sprintf(
-			"Expected token of type: %s, but got type: %s",
+			"Expected token of type: '%s', but got type: '%s'",
 			typeString,
 			token.tokenType,
 		))
@@ -237,4 +237,11 @@ func TestCanTokenizeCloseBrace(t *testing.T) {
 	checkTokenCount(t, tokens, 2)
 	checkToken(t, tokens[0], "closeBrace", "}", 1, 1)
 	checkToken(t, tokens[1], "EOF", "EOF", 1, 2)
+}
+
+func TestCanTokenizeElse(t *testing.T) {
+	tokens := makeTokens("else")
+	checkTokenCount(t, tokens, 2)
+	checkToken(t, tokens[0], "else", "else", 1, 1)
+	checkToken(t, tokens[1], "EOF", "EOF", 1, 5)
 }

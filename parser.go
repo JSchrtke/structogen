@@ -90,6 +90,8 @@ func (p *Parser) parseTokensUntil(delimiter string) ([]Node, error) {
 				return nodes, err
 			}
 			nodes = append(nodes, n)
+		case "else":
+			return nodes, newTokenValueError("statement", p.next())
 		}
 	}
 	p.readNext()

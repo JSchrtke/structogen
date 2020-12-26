@@ -234,3 +234,9 @@ func TestCanParseNestedIfs(t *testing.T) {
 	checkNodeCount(t, nestedIfBody, 1)
 	checkNode(t, nestedIfBody[0], "instruction", "d")
 }
+
+func TestElseWithoutIfCausesError(t *testing.T) {
+	tokens := makeTokens(`name("a") else {instruction("b")}`)
+	_, err := parseStructogram(tokens)
+	checkErrorMsg(t, err, "1:11, expected 'statement', but got 'else'")
+}
