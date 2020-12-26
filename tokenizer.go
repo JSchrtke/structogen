@@ -76,6 +76,8 @@ func makeTokens(s string) []Token {
 			t.emitToken("instruction")
 		case "else":
 			t.emitToken("else")
+		case "call":
+			t.emitToken("call")
 		case `"`, "'":
 			quot := string(t.runes)
 			str := ""

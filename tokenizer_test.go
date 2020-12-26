@@ -245,3 +245,10 @@ func TestCanTokenizeElse(t *testing.T) {
 	checkToken(t, tokens[0], "else", "else", 1, 1)
 	checkToken(t, tokens[1], "EOF", "EOF", 1, 5)
 }
+
+func TestCanTokenizeCall(t *testing.T) {
+	tokens := makeTokens("call")
+	checkTokenCount(t, tokens, 2)
+	checkToken(t, tokens[0], "call", "call", 1, 1)
+	checkToken(t, tokens[1], "EOF", "EOF", 1, 5)
+}
