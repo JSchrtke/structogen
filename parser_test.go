@@ -285,3 +285,16 @@ func TestCanParseCall(t *testing.T) {
 	checkNodeCount(t, structogram.nodes, 1)
 	checkNode(t, structogram.nodes[0], "call", "b")
 }
+
+func TestCanParseCallInsideIfBody(t *testing.T) {
+	tokens := makeTokens(`name("a") if("b") {call("c")}`)
+	structogram, err := parseStructogram(tokens)
+	checkOk(t, err)
+
+	checkNodeCount(t, structogram.nodes, 1)
+	ifNode := structogram.nodes[0]
+	checkNode(t, ifNode, "if", "b")
+
+	checkNodeCount(t, ifNode.nodes, 1)
+	checkNode(t, ifNode.nodes[0], "call", "c")
+}

@@ -51,7 +51,7 @@ func newTokenValueError(expected string, actual Token) error {
 }
 
 func isKeyword(s string) bool {
-	return s == "instruction" || s == "if"
+	return s == "instruction" || s == "if" || s == "call"
 }
 
 func (p *Parser) parseTokensUntil(delimiter string) ([]Node, error) {
