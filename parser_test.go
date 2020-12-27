@@ -175,6 +175,10 @@ func TestIfTokenHasToHaveBody(t *testing.T) {
 	tokens = makeTokens(`name("a")if("b"){name}`)
 	_, err = parseStructogram(tokens)
 	checkErrorMsg(t, err, "1:18, expected 'keyword', but got 'name'")
+
+	tokens = makeTokens(`name("a") if("b") {instruction("c")`)
+	_, err = parseStructogram(tokens)
+	checkErrorMsg(t, err, "1:36, expected 'closeBrace', but got 'EOF'")
 }
 
 func TestIfTokenCanHaveWhitespaceBetweenConditionAndBody(t *testing.T) {
