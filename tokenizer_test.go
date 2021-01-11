@@ -252,3 +252,10 @@ func TestCanTokenizeCall(t *testing.T) {
 	checkToken(t, tokens[0], "call", "call", 1, 1)
 	checkToken(t, tokens[1], "EOF", "EOF", 1, 5)
 }
+
+func TestCanTokenizeWhile(t *testing.T) {
+	tokens := makeTokens("while")
+	checkTokenCount(t, tokens, 2)
+	checkToken(t, tokens[0], "while", "while", 1, 1)
+	checkToken(t, tokens[1], "EOF", "EOF", 1, 6)
+}
