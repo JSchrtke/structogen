@@ -2,7 +2,7 @@ name("template name")
 
 instruction("counter = 0")
 
-while ("counter != 10") {
+while("counter != 10") {
     instruction("print counter")
 
     if ("counter % 2 == 0") {
