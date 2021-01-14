@@ -106,26 +106,9 @@ func (p *Parser) parseTokensUntil(delimiter string) ([]Node, error) {
 		case "else":
 			return nodes, newTokenValueError("statement", p.next())
 		case "while":
-			// discard the while token
-			p.readNext()
-
-			// TODO Maybe refactor this to something like p.checkNextType. To
-			// be able to do that, I need a global error in the parser and then
-			// probably check if the error is nil each parsing iteration.
-			if p.next().tokenType != "openParentheses" {
-				return nodes, newTokenValueError("openParentheses", p.next())
-			}
-			// discard the openParentheses
-			p.readNext()
-
-			if p.next().tokenType != "string" {
-				return nodes, newTokenValueError("string", p.next())
-			}
-			// TODO discard the while condition for now
-			p.readNext()
-
-			if p.next().tokenType != "closeParentheses" {
-				return nodes, newTokenValueError("closeParentheses", p.next())
+			err := p.parseWhile()
+			if err != nil {
+				return nodes, err
 			}
 		}
 	}
@@ -193,6 +176,32 @@ func (p *Parser) parseElse() (Node, error) {
 	elseNode.nodes = elseBody
 
 	return elseNode, err
+}
+
+func (p *Parser) parseWhile() error {
+	// discard the while token
+	p.readNext()
+
+	// TODO Maybe refactor this to something like p.checkNextType. To
+	// be able to do that, I need a global error in the parser and then
+	// probably check if the error is nil each parsing iteration.
+	if p.next().tokenType != "openParentheses" {
+		return newTokenValueError("openParentheses", p.next())
+	}
+	// discard the openParentheses
+	p.readNext()
+
+	if p.next().tokenType != "string" {
+		return newTokenValueError("string", p.next())
+	}
+	// TODO discard the while condition for now
+	p.readNext()
+
+	if p.next().tokenType != "closeParentheses" {
+		return newTokenValueError("closeParentheses", p.next())
+	}
+
+	return nil
 }
 
 func parseStructogram(tokens []Token) (Structogram, error) {
