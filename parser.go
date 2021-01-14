@@ -106,10 +106,11 @@ func (p *Parser) parseTokensUntil(delimiter string) ([]Node, error) {
 		case "else":
 			return nodes, newTokenValueError("statement", p.next())
 		case "while":
-			err := p.parseWhile()
+			whileNode, err := p.parseWhile()
 			if err != nil {
 				return nodes, err
 			}
+			nodes = append(nodes, whileNode)
 		}
 	}
 	if p.next().tokenType != delimiter {
@@ -149,6 +150,10 @@ func (p *Parser) parseIf() (Node, error) {
 	}
 	p.readNext()
 
+	if p.next().tokenType == "whitespace" {
+		p.readNext()
+	}
+
 	if !isKeyword(p.next().tokenType) {
 		return ifNode, newTokenValueError("keyword", p.next())
 	}
@@ -180,27 +185,28 @@ func (p *Parser) parseElse() (Node, error) {
 
 // TODO This function will end up looking very similar to parseIf. Think of
 // some clever way to refactor them to just use one function instead.
-func (p *Parser) parseWhile() error {
-	// discard the while token
-	p.readNext()
+func (p *Parser) parseWhile() (Node, error) {
+	var whileNode Node
+
+	whileNode.nodeType = p.readNext().tokenType
 
 	// TODO Maybe refactor this to something like p.checkNextType. To
 	// be able to do that, I need a global error in the parser and then
 	// probably check if the error is nil each parsing iteration.
 	if p.next().tokenType != "openParentheses" {
-		return newTokenValueError("openParentheses", p.next())
+		return whileNode, newTokenValueError("openParentheses", p.next())
 	}
 	// discard the openParentheses
 	p.readNext()
 
 	if p.next().tokenType != "string" {
-		return newTokenValueError("string", p.next())
+		return whileNode, newTokenValueError("string", p.next())
 	}
-	// TODO discard the while condition for now
-	p.readNext()
+
+	whileNode.value = p.readNext().value
 
 	if p.next().tokenType != "closeParentheses" {
-		return newTokenValueError("closeParentheses", p.next())
+		return whileNode, newTokenValueError("closeParentheses", p.next())
 	}
 	p.readNext()
 
@@ -210,16 +216,21 @@ func (p *Parser) parseWhile() error {
 
 	// Parsing of the body
 	if p.next().tokenType != "openBrace" {
-		return newTokenValueError("openBrace", p.next())
+		return whileNode, newTokenValueError("openBrace", p.next())
 	}
 	p.readNext()
 
-	if !isKeyword(p.next().tokenType) {
-		return newTokenValueError("keyword", p.next())
+	if p.next().tokenType == "whitespace" {
+		p.readNext()
 	}
-	_, err := p.parseTokensUntil("closeBrace")
 
-	return err
+	if !isKeyword(p.next().tokenType) {
+		return whileNode, newTokenValueError("keyword", p.next())
+	}
+	whileBody, err := p.parseTokensUntil("closeBrace")
+
+	whileNode.nodes = whileBody
+	return whileNode, err
 }
 
 func parseStructogram(tokens []Token) (Structogram, error) {

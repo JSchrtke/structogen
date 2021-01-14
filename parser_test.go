@@ -338,3 +338,52 @@ func TestWhileTokenHasToHaveBody(t *testing.T) {
 	_, err = parseStructogram(tokens)
 	checkErrorMsg(t, err, "1:39, expected 'closeBrace', but got 'EOF'")
 }
+
+func TestCanParseWhileBody(t *testing.T) {
+	tokens := makeTokens(
+		`name("a")
+		 while("b") {
+			 instruction("c")
+			 call("d")
+			 if("e") {
+				 instruction("f")
+			 }
+
+			 while("g") {
+				 instruction("h")
+			 }
+		 }`,
+	)
+	structogram, err := parseStructogram(tokens)
+	checkOk(t, err)
+	checkNodeCount(t, structogram.nodes, 1)
+
+	whileNode := structogram.nodes[0]
+	checkNode(t, whileNode, "while", "b")
+	whileBody := whileNode.nodes
+	checkNodeCount(t, whileBody, 4)
+
+	instructionNode := whileBody[0]
+	checkNode(t, instructionNode, "instruction", "c")
+	checkNodeCount(t, instructionNode.nodes, 0)
+
+	callNode := whileBody[1]
+	checkNode(t, callNode, "call", "d")
+	checkNodeCount(t, callNode.nodes, 0)
+
+	ifNode := whileBody[2]
+	checkNode(t, ifNode, "if", "e")
+	ifBody := ifNode.nodes
+	checkNodeCount(t, ifBody, 1)
+	instructionNode = ifBody[0]
+	checkNode(t, instructionNode, "instruction", "f")
+	checkNodeCount(t, instructionNode.nodes, 0)
+
+	nestedWhileNode := whileBody[3]
+	checkNode(t, nestedWhileNode, "while", "g")
+	nestedWhileBody := nestedWhileNode.nodes
+	checkNodeCount(t, nestedWhileBody, 1)
+	instructionNode = nestedWhileBody[0]
+	checkNode(t, instructionNode, "instruction", "h")
+	checkNodeCount(t, instructionNode.nodes, 0)
+}
