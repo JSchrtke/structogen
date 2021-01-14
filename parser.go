@@ -5,13 +5,6 @@ import (
 	"fmt"
 )
 
-type Token struct {
-	tokenType string
-	value     string
-	line      int
-	column    int
-}
-
 type Structogram struct {
 	name  string
 	nodes []Node
@@ -28,6 +21,34 @@ type Parser struct {
 	tokens     []Token
 }
 
+type Token struct {
+	tokenType string
+	value     string
+	line      int
+	column    int
+}
+
+func parseStructogram(tokens []Token) (Structogram, error) {
+	p := Parser{
+		tokenIndex: 0,
+		tokens:     tokens,
+	}
+	var parsed Structogram
+	var err error
+	if p.next().tokenType != "name" {
+		return parsed, newTokenValueError("name", p.next())
+	}
+	_ = p.readNext()
+	parsed.name, err = p.parseParentheses()
+	if err != nil {
+		return parsed, err
+	}
+
+	nodes, err := p.parseTokensUntil("EOF")
+	parsed.nodes = nodes
+	return parsed, err
+}
+
 func (p *Parser) next() Token {
 	return p.tokens[p.tokenIndex]
 }
@@ -36,22 +57,6 @@ func (p *Parser) readNext() Token {
 	t := p.next()
 	p.tokenIndex++
 	return t
-}
-
-func newTokenValueError(expected string, actual Token) error {
-	return errors.New(
-		fmt.Sprintf(
-			"%d:%d, expected '%s', but got '%s'",
-			actual.line,
-			actual.column,
-			expected,
-			actual.tokenType,
-		),
-	)
-}
-
-func isKeyword(s string) bool {
-	return s == "instruction" || s == "if" || s == "call"
 }
 
 func (p *Parser) parseParentheses() (string, error) {
@@ -182,23 +187,18 @@ func (p *Parser) parseElse() (Node, error) {
 	return elseNode, err
 }
 
-func parseStructogram(tokens []Token) (Structogram, error) {
-	p := Parser{
-		tokenIndex: 0,
-		tokens:     tokens,
-	}
-	var parsed Structogram
-	var err error
-	if p.next().tokenType != "name" {
-		return parsed, newTokenValueError("name", p.next())
-	}
-	_ = p.readNext()
-	parsed.name, err = p.parseParentheses()
-	if err != nil {
-		return parsed, err
-	}
+func newTokenValueError(expected string, actual Token) error {
+	return errors.New(
+		fmt.Sprintf(
+			"%d:%d, expected '%s', but got '%s'",
+			actual.line,
+			actual.column,
+			expected,
+			actual.tokenType,
+		),
+	)
+}
 
-	nodes, err := p.parseTokensUntil("EOF")
-	parsed.nodes = nodes
-	return parsed, err
+func isKeyword(s string) bool {
+	return s == "instruction" || s == "if" || s == "call"
 }
