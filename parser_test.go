@@ -316,3 +316,25 @@ func TestWhileHasToHaveCondition(t *testing.T) {
 	_, err = parseStructogram(tokens)
 	checkErrorMsg(t, err, "1:20, expected 'closeParentheses', but got 'EOF'")
 }
+
+func TestWhileTokenHasToHaveBody(t *testing.T) {
+	tokens := makeTokens(`name("a")while("b")`)
+	_, err := parseStructogram(tokens)
+	checkErrorMsg(t, err, "1:20, expected 'openBrace', but got 'EOF'")
+
+	tokens = makeTokens(`name("a")while("b"){`)
+	_, err = parseStructogram(tokens)
+	checkErrorMsg(t, err, "1:21, expected 'keyword', but got 'EOF'")
+
+	tokens = makeTokens(`name("a")while("b"){"c"`)
+	_, err = parseStructogram(tokens)
+	checkErrorMsg(t, err, "1:21, expected 'keyword', but got 'string'")
+
+	tokens = makeTokens(`name("a")while("b"){name}`)
+	_, err = parseStructogram(tokens)
+	checkErrorMsg(t, err, "1:21, expected 'keyword', but got 'name'")
+
+	tokens = makeTokens(`name("a") while("b") {instruction("c")`)
+	_, err = parseStructogram(tokens)
+	checkErrorMsg(t, err, "1:39, expected 'closeBrace', but got 'EOF'")
+}

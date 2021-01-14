@@ -178,6 +178,8 @@ func (p *Parser) parseElse() (Node, error) {
 	return elseNode, err
 }
 
+// TODO This function will end up looking very similar to parseIf. Think of
+// some clever way to refactor them to just use one function instead.
 func (p *Parser) parseWhile() error {
 	// discard the while token
 	p.readNext()
@@ -200,8 +202,24 @@ func (p *Parser) parseWhile() error {
 	if p.next().tokenType != "closeParentheses" {
 		return newTokenValueError("closeParentheses", p.next())
 	}
+	p.readNext()
 
-	return nil
+	if p.next().tokenType == "whitespace" {
+		p.readNext()
+	}
+
+	// Parsing of the body
+	if p.next().tokenType != "openBrace" {
+		return newTokenValueError("openBrace", p.next())
+	}
+	p.readNext()
+
+	if !isKeyword(p.next().tokenType) {
+		return newTokenValueError("keyword", p.next())
+	}
+	_, err := p.parseTokensUntil("closeBrace")
+
+	return err
 }
 
 func parseStructogram(tokens []Token) (Structogram, error) {
