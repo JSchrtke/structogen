@@ -302,3 +302,17 @@ func TestCanParseCallInsideIfBody(t *testing.T) {
 	checkNodeCount(t, ifNode.nodes, 1)
 	checkNode(t, ifNode.nodes[0], "call", "c")
 }
+
+func TestWhileHasToHaveCondition(t *testing.T) {
+	tokens := makeTokens(`name("a") while`)
+	_, err := parseStructogram(tokens)
+	checkErrorMsg(t, err, "1:16, expected 'openParentheses', but got 'EOF'")
+
+	tokens = makeTokens(`name("a") while(`)
+	_, err = parseStructogram(tokens)
+	checkErrorMsg(t, err, "1:17, expected 'string', but got 'EOF'")
+
+	tokens = makeTokens(`name("a") while("a"`)
+	_, err = parseStructogram(tokens)
+	checkErrorMsg(t, err, "1:20, expected 'closeParentheses', but got 'EOF'")
+}
