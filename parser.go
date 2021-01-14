@@ -54,6 +54,24 @@ func isKeyword(s string) bool {
 	return s == "instruction" || s == "if" || s == "call"
 }
 
+func (p *Parser) parseParentheses() (string, error) {
+	if p.next().tokenType != "openParentheses" {
+		return "", newTokenValueError("openParentheses", p.next())
+	}
+	p.readNext()
+
+	if p.next().tokenType != "string" {
+		return "", newTokenValueError("string", p.next())
+	}
+	content := p.readNext().value
+
+	if p.next().tokenType != "closeParentheses" {
+		return "", newTokenValueError("closeParentheses", p.next())
+	}
+	p.readNext()
+	return content, nil
+}
+
 func (p *Parser) parseTokensUntil(delimiter string) ([]Node, error) {
 	var nodes []Node
 	var err error
@@ -70,20 +88,10 @@ func (p *Parser) parseTokensUntil(delimiter string) ([]Node, error) {
 			var n Node
 			n.nodeType = p.readNext().tokenType
 
-			if p.next().tokenType != "openParentheses" {
-				return nodes, newTokenValueError("openParentheses", p.next())
+			n.value, err = p.parseParentheses()
+			if err != nil {
+				return nodes, err
 			}
-			p.readNext()
-
-			if p.next().tokenType != "string" {
-				return nodes, newTokenValueError("string", p.next())
-			}
-			n.value = p.readNext().value
-
-			if p.next().tokenType != "closeParentheses" {
-				return nodes, newTokenValueError("closeParentheses", p.next())
-			}
-			p.readNext()
 
 			nodes = append(nodes, n)
 		case "if":
@@ -125,20 +133,13 @@ func (p *Parser) parseConditional() (Node, error) {
 	var node Node
 
 	node.nodeType = p.readNext().value
-	if p.next().tokenType != "openParentheses" {
-		return node, newTokenValueError("openParentheses", p.next())
-	}
-	p.readNext()
 
-	if p.next().tokenType != "string" {
-		return node, newTokenValueError("string", p.next())
+	v, err := p.parseParentheses()
+	node.value = v
+	if err != nil {
+		return node, err
 	}
-	node.value = p.readNext().value
 
-	if p.next().tokenType != "closeParentheses" {
-		return node, newTokenValueError("closeParentheses", p.next())
-	}
-	p.readNext()
 	if p.next().tokenType == "whitespace" {
 		p.readNext()
 	}
@@ -192,19 +193,10 @@ func parseStructogram(tokens []Token) (Structogram, error) {
 		return parsed, newTokenValueError("name", p.next())
 	}
 	_ = p.readNext()
-	if p.next().tokenType != "openParentheses" {
-		return parsed, newTokenValueError("openParentheses", p.next())
+	parsed.name, err = p.parseParentheses()
+	if err != nil {
+		return parsed, err
 	}
-	tok := p.readNext()
-	if p.next().tokenType != "string" {
-		return parsed, newTokenValueError("string", p.next())
-	}
-	tok = p.readNext()
-	parsed.name = tok.value
-	if p.next().tokenType != "closeParentheses" {
-		return parsed, newTokenValueError("closeParentheses", p.next())
-	}
-	p.readNext()
 
 	nodes, err := p.parseTokensUntil("EOF")
 	parsed.nodes = nodes
