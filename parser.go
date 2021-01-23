@@ -36,7 +36,7 @@ func parseStructogram(tokens []Token) (Structogram, error) {
 	var parsed Structogram
 	var err error
 	if p.next().tokenType != "name" {
-		return parsed, newTokenValueError("name", p.next())
+		return parsed, newTokenTypeError("name", p.next())
 	}
 	_ = p.readNext()
 	parsed.name, err = p.parseParentheses()
@@ -61,17 +61,17 @@ func (p *Parser) readNext() Token {
 
 func (p *Parser) parseParentheses() (string, error) {
 	if p.next().tokenType != "openParentheses" {
-		return "", newTokenValueError("openParentheses", p.next())
+		return "", newTokenTypeError("openParentheses", p.next())
 	}
 	p.readNext()
 
 	if p.next().tokenType != "string" {
-		return "", newTokenValueError("string", p.next())
+		return "", newTokenTypeError("string", p.next())
 	}
 	content := p.readNext().value
 
 	if p.next().tokenType != "closeParentheses" {
-		return "", newTokenValueError("closeParentheses", p.next())
+		return "", newTokenTypeError("closeParentheses", p.next())
 	}
 	p.readNext()
 	return content, nil
@@ -84,11 +84,11 @@ func (p *Parser) parseTokensUntil(delimiter string) ([]Node, error) {
 	for p.next().tokenType != delimiter {
 		switch p.next().tokenType {
 		case "EOF":
-			return nodes, newTokenValueError(delimiter, p.next())
+			return nodes, newTokenTypeError(delimiter, p.next())
 		case "whitespace":
 			p.readNext()
 		case "invalid":
-			return nodes, newTokenValueError("keyword", p.next())
+			return nodes, newTokenTypeError("keyword", p.next())
 		case "instruction", "call":
 			var n Node
 			n.nodeType = p.readNext().tokenType
@@ -117,7 +117,7 @@ func (p *Parser) parseTokensUntil(delimiter string) ([]Node, error) {
 				nodes = append(nodes, elseNode)
 			}
 		case "else":
-			return nodes, newTokenValueError("statement", p.next())
+			return nodes, newTokenTypeError("statement", p.next())
 		case "while":
 			whileNode, err := p.parseConditional()
 			if err != nil {
@@ -127,7 +127,7 @@ func (p *Parser) parseTokensUntil(delimiter string) ([]Node, error) {
 		}
 	}
 	if p.next().tokenType != delimiter {
-		return nodes, newTokenValueError(delimiter, p.next())
+		return nodes, newTokenTypeError(delimiter, p.next())
 	}
 	p.readNext()
 
@@ -150,7 +150,7 @@ func (p *Parser) parseConditional() (Node, error) {
 	}
 
 	if p.next().tokenType != "openBrace" {
-		return node, newTokenValueError("openBrace", p.next())
+		return node, newTokenTypeError("openBrace", p.next())
 	}
 	p.readNext()
 
@@ -159,7 +159,7 @@ func (p *Parser) parseConditional() (Node, error) {
 	}
 
 	if !isKeyword(p.next().tokenType) {
-		return node, newTokenValueError("keyword", p.next())
+		return node, newTokenTypeError("keyword", p.next())
 	}
 	body, err := p.parseTokensUntil("closeBrace")
 	node.nodes = body
@@ -175,11 +175,11 @@ func (p *Parser) parseElse() (Node, error) {
 		p.readNext()
 	}
 	if p.next().tokenType != "openBrace" {
-		return elseNode, newTokenValueError("openBrace", p.next())
+		return elseNode, newTokenTypeError("openBrace", p.next())
 	}
 	p.readNext()
 	if !isKeyword(p.next().tokenType) {
-		return elseNode, newTokenValueError("keyword", p.next())
+		return elseNode, newTokenTypeError("keyword", p.next())
 	}
 	elseBody, err := p.parseTokensUntil("closeBrace")
 	elseNode.nodes = elseBody
@@ -187,7 +187,7 @@ func (p *Parser) parseElse() (Node, error) {
 	return elseNode, err
 }
 
-func newTokenValueError(expected string, actual Token) error {
+func newTokenTypeError(expected string, actual Token) error {
 	return errors.New(
 		fmt.Sprintf(
 			"%d:%d, expected '%s', but got '%s'",
