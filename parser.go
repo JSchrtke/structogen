@@ -44,7 +44,7 @@ func parseStructogram(tokens []Token) (Structogram, error) {
 		return parsed, err
 	}
 
-	nodes, err := p.parseTokensUntil("EOF")
+	nodes, err := p.parseUntil("EOF")
 	parsed.nodes = nodes
 	return parsed, err
 }
@@ -77,7 +77,7 @@ func (p *Parser) parseParentheses() (string, error) {
 	return content, nil
 }
 
-func (p *Parser) parseTokensUntil(delimiter string) ([]Node, error) {
+func (p *Parser) parseUntil(delimiter string) ([]Node, error) {
 	var nodes []Node
 	var err error
 
@@ -167,7 +167,7 @@ func (p *Parser) parseConditional() (Node, error) {
 	if !isKeyword(p.next().tokenType) {
 		return node, newTokenTypeError("keyword", p.next())
 	}
-	body, err := p.parseTokensUntil("closeBrace")
+	body, err := p.parseUntil("closeBrace")
 	node.nodes = body
 
 	return node, err
@@ -187,7 +187,7 @@ func (p *Parser) parseElse() (Node, error) {
 	if !isKeyword(p.next().tokenType) {
 		return elseNode, newTokenTypeError("keyword", p.next())
 	}
-	elseBody, err := p.parseTokensUntil("closeBrace")
+	elseBody, err := p.parseUntil("closeBrace")
 	elseNode.nodes = elseBody
 
 	return elseNode, err
