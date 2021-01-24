@@ -31,6 +31,7 @@ func checkNodeCount(t *testing.T, n []Node, count int) {
 }
 
 func checkNode(t *testing.T, n Node, nodeType string, value string) {
+	t.Helper()
 	if n.nodeType != nodeType {
 		t.Errorf(
 			"Wrong node type, expected %s, but got %s", nodeType, n.nodeType,
@@ -384,6 +385,91 @@ func TestCanParseWhileBody(t *testing.T) {
 	nestedWhileBody := nestedWhileNode.nodes
 	checkNodeCount(t, nestedWhileBody, 1)
 	instructionNode = nestedWhileBody[0]
+	checkNode(t, instructionNode, "instruction", "h")
+	checkNodeCount(t, instructionNode.nodes, 0)
+}
+
+func TestDoWhileHasToHaveCondition(t *testing.T) {
+	tokens := makeTokens(`name("a") dowhile`)
+	_, err := parseStructogram(tokens)
+	checkErrorMsg(t, err, "1:18, expected 'openParentheses', but got 'EOF'")
+
+	tokens = makeTokens(`name("a") dowhile(`)
+	_, err = parseStructogram(tokens)
+	checkErrorMsg(t, err, "1:19, expected 'string', but got 'EOF'")
+
+	tokens = makeTokens(`name("a") dowhile("a"`)
+	_, err = parseStructogram(tokens)
+	checkErrorMsg(t, err, "1:22, expected 'closeParentheses', but got 'EOF'")
+}
+
+func TestDoWhileTokenHasToHaveBody(t *testing.T) {
+	tokens := makeTokens(`name("a")dowhile("b")`)
+	_, err := parseStructogram(tokens)
+	checkErrorMsg(t, err, "1:22, expected 'openBrace', but got 'EOF'")
+
+	tokens = makeTokens(`name("a")dowhile("b"){`)
+	_, err = parseStructogram(tokens)
+	checkErrorMsg(t, err, "1:23, expected 'keyword', but got 'EOF'")
+
+	tokens = makeTokens(`name("a")dowhile("b"){"c"`)
+	_, err = parseStructogram(tokens)
+	checkErrorMsg(t, err, "1:23, expected 'keyword', but got 'string'")
+
+	tokens = makeTokens(`name("a")dowhile("b"){name}`)
+	_, err = parseStructogram(tokens)
+	checkErrorMsg(t, err, "1:23, expected 'keyword', but got 'name'")
+
+	tokens = makeTokens(`name("a") dowhile("b") {instruction("c")`)
+	_, err = parseStructogram(tokens)
+	checkErrorMsg(t, err, "1:41, expected 'closeBrace', but got 'EOF'")
+}
+
+func TestCanParseDoWhileBody(t *testing.T) {
+	tokens := makeTokens(
+		`name("a")
+		 dowhile("b") {
+			 instruction("c")
+			 call("d")
+			 if("e") {
+				 instruction("f")
+			 }
+
+			 dowhile("g") {
+				 instruction("h")
+			 }
+		 }`,
+	)
+	structogram, err := parseStructogram(tokens)
+	checkOk(t, err)
+	checkNodeCount(t, structogram.nodes, 1)
+
+	doWhileNode := structogram.nodes[0]
+	checkNode(t, doWhileNode, "dowhile", "b")
+	doWhileBody := doWhileNode.nodes
+	checkNodeCount(t, doWhileBody, 4)
+
+	instructionNode := doWhileBody[0]
+	checkNode(t, instructionNode, "instruction", "c")
+	checkNodeCount(t, instructionNode.nodes, 0)
+
+	callNode := doWhileBody[1]
+	checkNode(t, callNode, "call", "d")
+	checkNodeCount(t, callNode.nodes, 0)
+
+	ifNode := doWhileBody[2]
+	checkNode(t, ifNode, "if", "e")
+	ifBody := ifNode.nodes
+	checkNodeCount(t, ifBody, 1)
+	instructionNode = ifBody[0]
+	checkNode(t, instructionNode, "instruction", "f")
+	checkNodeCount(t, instructionNode.nodes, 0)
+
+	nestedDoWhileNode := doWhileBody[3]
+	checkNode(t, nestedDoWhileNode, "dowhile", "g")
+	nestedDoWhileBody := nestedDoWhileNode.nodes
+	checkNodeCount(t, nestedDoWhileBody, 1)
+	instructionNode = nestedDoWhileBody[0]
 	checkNode(t, instructionNode, "instruction", "h")
 	checkNodeCount(t, instructionNode.nodes, 0)
 }

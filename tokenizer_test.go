@@ -259,3 +259,10 @@ func TestCanTokenizeWhile(t *testing.T) {
 	checkToken(t, tokens[0], "while", "while", 1, 1)
 	checkToken(t, tokens[1], "EOF", "EOF", 1, 6)
 }
+
+func TestCanTokenizeDoWhile(t *testing.T) {
+	tokens := makeTokens("dowhile")
+	checkTokenCount(t, tokens, 2)
+	checkToken(t, tokens[0], "dowhile", "dowhile", 1, 1)
+	checkToken(t, tokens[1], "EOF", "EOF", 1, 8)
+}

@@ -80,6 +80,8 @@ func makeTokens(s string) []Token {
 			t.emitToken("call")
 		case "while":
 			t.emitToken("while")
+		case "dowhile":
+			t.emitToken("dowhile")
 		case `"`, "'":
 			quot := string(t.runes)
 			str := ""

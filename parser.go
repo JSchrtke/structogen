@@ -124,6 +124,12 @@ func (p *Parser) parseTokensUntil(delimiter string) ([]Node, error) {
 				return nodes, err
 			}
 			nodes = append(nodes, whileNode)
+		case "dowhile":
+			doWhileNode, err := p.parseConditional()
+			if err != nil {
+				return nodes, err
+			}
+			nodes = append(nodes, doWhileNode)
 		}
 	}
 	if p.next().tokenType != delimiter {
