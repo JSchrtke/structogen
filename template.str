@@ -15,10 +15,18 @@ while("counter != 10") {
 
     dowhile("counter < 5") {
         switch("counter") {
-            {1:"printOne"}
-            {2:"printTwo"}
-            {3:""}
-            {default:"printDefault"}
+            case("1") {
+                instruction("printOne")
+            }
+            case("two") {
+                call("printTwo")
+            }
+            case("3") {
+                instruction("")
+            }
+            default {
+                instruction("printDefault")
+            }
         }
 
         instruction("counter++")
