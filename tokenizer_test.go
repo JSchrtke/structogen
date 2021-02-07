@@ -266,3 +266,10 @@ func TestCanTokenizeDoWhile(t *testing.T) {
 	checkToken(t, tokens[0], "dowhile", "dowhile", 1, 1)
 	checkToken(t, tokens[1], "EOF", "EOF", 1, 8)
 }
+
+func TestCanTokenizeSwitch(t *testing.T) {
+	tokens := makeTokens("switch")
+	checkTokenCount(t, tokens, 2)
+	checkToken(t, tokens[0], "switch", "switch", 1, 1)
+	checkToken(t, tokens[1], "EOF", "EOF", 1, 7)
+}
