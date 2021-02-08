@@ -473,3 +473,17 @@ func TestCanParseDoWhileBody(t *testing.T) {
 	checkNode(t, instructionNode, "instruction", "h")
 	checkNodeCount(t, instructionNode.nodes, 0)
 }
+
+func TestSwitchHasToHaveCondition(t *testing.T) {
+	tokens := makeTokens(`name("a") switch`)
+	_, err := parseStructogram(tokens)
+	checkErrorMsg(t, err, "1:17, expected 'openParentheses', but got 'EOF'")
+
+	tokens = makeTokens(`name("a") switch(`)
+	_, err = parseStructogram(tokens)
+	checkErrorMsg(t, err, "1:18, expected 'string', but got 'EOF'")
+
+	tokens = makeTokens(`name("a") switch("b"`)
+	_, err = parseStructogram(tokens)
+	checkErrorMsg(t, err, "1:21, expected 'closeParentheses', but got 'EOF'")
+}
