@@ -143,6 +143,18 @@ func (p *Parser) parseUntil(delimiter string) ([]Node, error) {
 			if p.next().tokenType != "closeParentheses" {
 				return nodes, newTokenTypeError("closeParentheses", p.next())
 			}
+			// discard the closeParentheses
+			p.readNext()
+			// the next token should be openBrace
+			if p.next().tokenType != "openBrace" {
+				return nodes, newTokenTypeError("openBrace", p.next())
+			}
+			// discard the openBrace
+			p.readNext()
+			// the next token should be closeBrace
+			if p.next().tokenType != "closeBrace" {
+				return nodes, newTokenTypeError("closeBrace", p.next())
+			}
 		}
 	}
 	if p.next().tokenType != delimiter {

@@ -487,3 +487,13 @@ func TestSwitchHasToHaveCondition(t *testing.T) {
 	_, err = parseStructogram(tokens)
 	checkErrorMsg(t, err, "1:21, expected 'closeParentheses', but got 'EOF'")
 }
+
+func TestSwitchHasToHaveBody(t *testing.T) {
+	tokens := makeTokens(`name("a") switch("b")`)
+	_, err := parseStructogram(tokens)
+	checkErrorMsg(t, err, "1:22, expected 'openBrace', but got 'EOF'")
+
+	tokens = makeTokens(`name("a") switch("b"){`)
+	_, err = parseStructogram(tokens)
+	checkErrorMsg(t, err, "1:23, expected 'closeBrace', but got 'EOF'")
+}
