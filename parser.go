@@ -155,6 +155,28 @@ func (p *Parser) parseUntil(delimiter string) ([]Node, error) {
 			if p.next().tokenType != "closeBrace" {
 				return nodes, newTokenTypeError("closeBrace", p.next())
 			}
+		case "default":
+			var defaultNode Node
+			defaultNode.nodeType = p.readNext().tokenType
+			defaultNode.value = ""
+
+			if p.next().tokenType == "whitespace" {
+				p.readNext()
+			}
+			if p.next().tokenType != "openBrace" {
+				return nodes, newTokenTypeError("openBrace", p.next())
+			}
+			p.readNext()
+			if p.next().tokenType == "whitespace" {
+				p.readNext()
+			}
+
+			defaultNode.nodes, err = p.parseUntil("closeBrace")
+			if err != nil {
+				return nodes, err
+			}
+
+			nodes = append(nodes, defaultNode)
 		}
 	}
 	if p.next().tokenType != delimiter {

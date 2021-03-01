@@ -497,3 +497,22 @@ func TestSwitchHasToHaveBody(t *testing.T) {
 	_, err = parseStructogram(tokens)
 	checkErrorMsg(t, err, "1:23, expected 'closeBrace', but got 'EOF'")
 }
+
+func TestCanParseDefault(t *testing.T) {
+	tokens := makeTokens(`name("a") default`)
+	_, err := parseStructogram(tokens)
+	checkErrorMsg(t, err, "1:18, expected 'openBrace', but got 'EOF'")
+
+	tokens = makeTokens(`name("a") default {`)
+	_, err = parseStructogram(tokens)
+	checkErrorMsg(t, err, "1:20, expected 'closeBrace', but got 'EOF'")
+
+	tokens = makeTokens(`name("a") default {instruction("b")}`)
+	structogram, err := parseStructogram(tokens)
+	checkOk(t, err)
+
+	checkNodeCount(t, structogram.nodes, 1)
+	defaultNode := structogram.nodes[0]
+	checkNode(t, defaultNode, "default", "")
+	checkNodeCount(t, defaultNode.nodes, 1)
+}
