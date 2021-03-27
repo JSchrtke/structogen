@@ -493,9 +493,9 @@ func TestSwitchHasToHaveBody(t *testing.T) {
 	_, err := parseStructogram(tokens)
 	checkErrorMsg(t, err, "1:22, expected 'openBrace', but got 'EOF'")
 
-	tokens = makeTokens(`name("a") switch("b"){`)
+	tokens = makeTokens(`name("a") switch("b"){default`)
 	_, err = parseStructogram(tokens)
-	checkErrorMsg(t, err, "1:23, expected 'closeBrace', but got 'EOF'")
+	checkErrorMsg(t, err, "1:30, expected 'closeBrace', but got 'EOF'")
 }
 
 func TestCanParseDefault(t *testing.T) {
@@ -515,4 +515,10 @@ func TestCanParseDefault(t *testing.T) {
 	defaultNode := structogram.nodes[0]
 	checkNode(t, defaultNode, "default", "")
 	checkNodeCount(t, defaultNode.nodes, 1)
+}
+
+func TestSwitchBodyHasToHaveDefaultCase(t *testing.T) {
+	tokens := makeTokens(`name("a") switch("b") {}`)
+	_, err := parseStructogram(tokens)
+	checkErrorMsg(t, err, "1:24, expected 'default', but got 'closeBrace'")
 }

@@ -125,33 +125,30 @@ func (p *Parser) parseUntil(delimiter string) ([]Node, error) {
 			}
 			nodes = append(nodes, conditionalNode)
 		case "switch":
-			// discard the switch token
 			p.readNext()
-			// next token should be open parentheses
 			if p.next().tokenType != "openParentheses" {
 				return nodes, newTokenTypeError("openParentheses", p.next())
 			}
-			// discard the open parentheses
 			p.readNext()
-			// next token should be a string
 			if p.next().tokenType != "string" {
 				return nodes, newTokenTypeError("string", p.next())
 			}
-			// discard the string for now
 			p.readNext()
-			// next token should be closeParentheses
 			if p.next().tokenType != "closeParentheses" {
 				return nodes, newTokenTypeError("closeParentheses", p.next())
 			}
-			// discard the closeParentheses
 			p.readNext()
-			// the next token should be openBrace
+			if p.next().tokenType == "whitespace" {
+				p.readNext()
+			}
 			if p.next().tokenType != "openBrace" {
 				return nodes, newTokenTypeError("openBrace", p.next())
 			}
-			// discard the openBrace
 			p.readNext()
-			// the next token should be closeBrace
+			if p.next().tokenType != "default" {
+				return nodes, newTokenTypeError("default", p.next())
+			}
+			p.readNext()
 			if p.next().tokenType != "closeBrace" {
 				return nodes, newTokenTypeError("closeBrace", p.next())
 			}
