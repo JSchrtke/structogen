@@ -35,6 +35,9 @@ func parseStructogram(tokens []Token) (Structogram, error) {
 	}
 	var parsed Structogram
 	var err error
+	if p.next().tokenType == "whitespace" {
+		p.readNext()
+	}
 	if p.next().tokenType != "name" {
 		return parsed, newTokenTypeError("name", p.next())
 	}
@@ -125,33 +128,20 @@ func (p *Parser) parseUntil(delimiter string) ([]Node, error) {
 			}
 			nodes = append(nodes, conditionalNode)
 		case "switch":
-			p.readNext()
-			if p.next().tokenType != "openParentheses" {
-				return nodes, newTokenTypeError("openParentheses", p.next())
+			switchNode := Node{}
+			switchNode.nodeType = p.readNext().tokenType
+			switchNode.value, err = p.parseParentheses()
+			if err != nil {
+				return nodes, err
 			}
-			p.readNext()
-			if p.next().tokenType != "string" {
-				return nodes, newTokenTypeError("string", p.next())
-			}
-			p.readNext()
-			if p.next().tokenType != "closeParentheses" {
-				return nodes, newTokenTypeError("closeParentheses", p.next())
-			}
-			p.readNext()
 			if p.next().tokenType == "whitespace" {
 				p.readNext()
 			}
-			if p.next().tokenType != "openBrace" {
-				return nodes, newTokenTypeError("openBrace", p.next())
+			switchNode.nodes, err = p.parseSwitchBody()
+			if err != nil {
+				return nodes, err
 			}
-			p.readNext()
-			if p.next().tokenType != "default" {
-				return nodes, newTokenTypeError("default", p.next())
-			}
-			p.readNext()
-			if p.next().tokenType != "closeBrace" {
-				return nodes, newTokenTypeError("closeBrace", p.next())
-			}
+			nodes = append(nodes, switchNode)
 		case "default":
 			var defaultNode Node
 			defaultNode.nodeType = p.readNext().tokenType
@@ -160,26 +150,18 @@ func (p *Parser) parseUntil(delimiter string) ([]Node, error) {
 			if p.next().tokenType == "whitespace" {
 				p.readNext()
 			}
-			if p.next().tokenType != "openBrace" {
-				return nodes, newTokenTypeError("openBrace", p.next())
-			}
-			p.readNext()
-			if p.next().tokenType == "whitespace" {
-				p.readNext()
-			}
-
-			defaultNode.nodes, err = p.parseUntil("closeBrace")
+			defaultNode.nodes, err = p.parseBraces()
 			if err != nil {
 				return nodes, err
 			}
 
 			nodes = append(nodes, defaultNode)
-        case "case":
-            caseNode, err := p.parseConditional()
-            if err != nil {
-                return nodes, err
-            }
-            nodes = append(nodes, caseNode)
+		case "case":
+			caseNode, err := p.parseConditional()
+			if err != nil {
+				return nodes, err
+			}
+			nodes = append(nodes, caseNode)
 		}
 	}
 	if p.next().tokenType != delimiter {
@@ -190,10 +172,77 @@ func (p *Parser) parseUntil(delimiter string) ([]Node, error) {
 	return nodes, err
 }
 
+func (p *Parser) parseBraces() ([]Node, error) {
+	var body []Node
+	if p.next().tokenType != "openBrace" {
+		return body, newTokenTypeError("openBrace", p.next())
+	}
+	p.readNext()
+	if p.next().tokenType == "whitespace" {
+		p.readNext()
+	}
+	if !isKeyword(p.next().tokenType) {
+		return body, newTokenTypeError("keyword", p.next())
+	}
+	body, err := p.parseUntil("closeBrace")
+	if err != nil {
+		return body, err
+	}
+	return body, nil
+}
+
+func (p *Parser) parseSwitchBody() ([]Node, error) {
+	var switchBody []Node
+	if p.next().tokenType != "openBrace" {
+		return switchBody, newTokenTypeError("openBrace", p.next())
+	}
+	p.readNext()
+	if p.next().tokenType == "whitespace" {
+		p.readNext()
+	}
+	for p.next().tokenType == "case" {
+		caseNode, err := p.parseConditional()
+		if err != nil {
+			return switchBody, err
+		}
+		switchBody = append(switchBody, caseNode)
+		if p.next().tokenType == "whitespace" {
+			p.readNext()
+		}
+	}
+	if p.next().tokenType != "default" {
+		return switchBody, newTokenTypeError("default", p.next())
+	}
+	var defaultNode Node
+	defaultNode.nodeType = p.readNext().tokenType
+	defaultNode.value = ""
+	if p.next().tokenType == "whitespace" {
+		p.readNext()
+	}
+	defaultBody, err := p.parseBraces()
+	if err != nil {
+		return switchBody, err
+	}
+	if p.next().tokenType == "whitespace" {
+		p.readNext()
+	}
+	if p.next().tokenType != "closeBrace" {
+		return switchBody, newTokenTypeError("closeBrace", p.next())
+	}
+	p.readNext()
+	defaultNode.nodes = defaultBody
+	switchBody = append(switchBody, defaultNode)
+	return switchBody, nil
+}
+
 func (p *Parser) parseConditional() (Node, error) {
 	var node Node
 
 	node.nodeType = p.readNext().value
+
+	if p.next().tokenType == "whitespace" {
+		p.readNext()
+	}
 
 	v, err := p.parseParentheses()
 	node.value = v
@@ -204,22 +253,8 @@ func (p *Parser) parseConditional() (Node, error) {
 	if p.next().tokenType == "whitespace" {
 		p.readNext()
 	}
-
-	if p.next().tokenType != "openBrace" {
-		return node, newTokenTypeError("openBrace", p.next())
-	}
-	p.readNext()
-
-	if p.next().tokenType == "whitespace" {
-		p.readNext()
-	}
-
-	if !isKeyword(p.next().tokenType) {
-		return node, newTokenTypeError("keyword", p.next())
-	}
-	body, err := p.parseUntil("closeBrace")
+	body, err := p.parseBraces()
 	node.nodes = body
-
 	return node, err
 }
 
@@ -227,19 +262,12 @@ func (p *Parser) parseElse() (Node, error) {
 	var elseNode Node
 
 	elseNode.nodeType = p.readNext().tokenType
+
 	if p.next().tokenType == "whitespace" {
 		p.readNext()
 	}
-	if p.next().tokenType != "openBrace" {
-		return elseNode, newTokenTypeError("openBrace", p.next())
-	}
-	p.readNext()
-	if !isKeyword(p.next().tokenType) {
-		return elseNode, newTokenTypeError("keyword", p.next())
-	}
-	elseBody, err := p.parseUntil("closeBrace")
+	elseBody, err := p.parseBraces()
 	elseNode.nodes = elseBody
-
 	return elseNode, err
 }
 
@@ -256,5 +284,5 @@ func newTokenTypeError(expected string, actual Token) error {
 }
 
 func isKeyword(s string) bool {
-	return s == "instruction" || s == "if" || s == "call"
+	return s == "instruction" || s == "if" || s == "call" || s == "default" || s == "switch"
 }

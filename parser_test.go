@@ -1,6 +1,8 @@
 package main
 
-import "testing"
+import (
+	"testing"
+)
 
 func checkOk(t *testing.T, err error) {
 	t.Helper()
@@ -74,7 +76,6 @@ func TestNameHasToBeFirstToken(t *testing.T) {
 }
 
 func TestNameValueHasToBeEnclosedByParentheses(t *testing.T) {
-
 	tokens := makeTokens(`name"a name"`)
 	_, err := parseStructogram(tokens)
 	checkErrorMsg(t, err, "1:5, expected 'openParentheses', but got 'string'")
@@ -156,9 +157,9 @@ func TestIfTokenValueCanNotBeEmpty(t *testing.T) {
 }
 
 func TestIfTokenHasToHaveBody(t *testing.T) {
-	tokens := makeTokens(`name("a")if("b")`)
+	tokens := makeTokens(`name("a")if ("b")`)
 	_, err := parseStructogram(tokens)
-	checkErrorMsg(t, err, "1:17, expected 'openBrace', but got 'EOF'")
+	checkErrorMsg(t, err, "1:18, expected 'openBrace', but got 'EOF'")
 
 	// The only valid tokens inside of an if-body are keywords or whitespace.
 	// Whitespace should get entirely ignored, and anything that is not a
@@ -488,73 +489,74 @@ func TestSwitchHasToHaveCondition(t *testing.T) {
 	checkErrorMsg(t, err, "1:21, expected 'closeParentheses', but got 'EOF'")
 }
 
-func TestSwitchHasToHaveBody(t *testing.T) {
-	tokens := makeTokens(`name("a") switch("b")`)
-	_, err := parseStructogram(tokens)
-	checkErrorMsg(t, err, "1:22, expected 'openBrace', but got 'EOF'")
-
-	tokens = makeTokens(`name("a") switch("b"){default`)
-	_, err = parseStructogram(tokens)
-	checkErrorMsg(t, err, "1:30, expected 'closeBrace', but got 'EOF'")
-}
-
 func TestCanParseDefault(t *testing.T) {
-	tokens := makeTokens(`name("a") default`)
+	tokens := makeTokens(`name("a") switch("b") {default}`)
 	_, err := parseStructogram(tokens)
-	checkErrorMsg(t, err, "1:18, expected 'openBrace', but got 'EOF'")
+	checkErrorMsg(t, err, "1:31, expected 'openBrace', but got 'closeBrace'")
 
-	tokens = makeTokens(`name("a") default {`)
+	tokens = makeTokens(`name("a") switch("b") {default {`)
 	_, err = parseStructogram(tokens)
-	checkErrorMsg(t, err, "1:20, expected 'closeBrace', but got 'EOF'")
+	checkErrorMsg(t, err, "1:33, expected 'keyword', but got 'EOF'")
 
-	tokens = makeTokens(`name("a") default {instruction("b")}`)
+	tokens = makeTokens(`name("a") switch("b"){default {instruction("b")}`)
+	_, err = parseStructogram(tokens)
+	checkErrorMsg(t, err, "1:49, expected 'closeBrace', but got 'EOF'")
+
+	tokens = makeTokens(`name("a") switch("b"){default {instruction("b")}}`)
 	structogram, err := parseStructogram(tokens)
 	checkOk(t, err)
+	_ = structogram
 
 	checkNodeCount(t, structogram.nodes, 1)
-	defaultNode := structogram.nodes[0]
+	switchNode := structogram.nodes[0]
+	checkNode(t, switchNode, "switch", "b")
+	switchBody := switchNode.nodes
+	checkNodeCount(t, switchBody, 1)
+	defaultNode := switchBody[0]
 	checkNode(t, defaultNode, "default", "")
-	checkNodeCount(t, defaultNode.nodes, 1)
+	defaultBody := defaultNode.nodes
+	checkNodeCount(t, defaultBody, 1)
+	checkNode(t, defaultNode.nodes[0], "instruction", "b")
 }
 
 func TestSwitchBodyHasToHaveDefaultCase(t *testing.T) {
-	tokens := makeTokens(`name("a") switch("b") {}`)
+	tokens := makeTokens(`name("a") switch("b") {case("c"){instruction("d")} }`)
 	_, err := parseStructogram(tokens)
-	checkErrorMsg(t, err, "1:24, expected 'default', but got 'closeBrace'")
+	checkErrorMsg(t, err, "1:52, expected 'default', but got 'closeBrace'")
 }
 
 func TestCanParseCase(t *testing.T) {
-    tokens := makeTokens(`name("a") case`)
-    _, err := parseStructogram(tokens)
-    checkErrorMsg(t, err, "1:15, expected 'openParentheses', but got 'EOF'")
+	tokens := makeTokens(`name("a") case`)
+	_, err := parseStructogram(tokens)
+	checkErrorMsg(t, err, "1:15, expected 'openParentheses', but got 'EOF'")
 
-    tokens = makeTokens(`name("a") case(`)
-    _, err = parseStructogram(tokens)
-    checkErrorMsg(t, err, "1:16, expected 'string', but got 'EOF'")
+	tokens = makeTokens(`name("a") case(`)
+	_, err = parseStructogram(tokens)
+	checkErrorMsg(t, err, "1:16, expected 'string', but got 'EOF'")
 
-    tokens = makeTokens(`name("a") case("b"`)
-    _, err = parseStructogram(tokens)
-    checkErrorMsg(t, err, "1:19, expected 'closeParentheses', but got 'EOF'")
+	tokens = makeTokens(`name("a") case("b"`)
+	_, err = parseStructogram(tokens)
+	checkErrorMsg(t, err, "1:19, expected 'closeParentheses', but got 'EOF'")
 
-    tokens = makeTokens(`name("a") case("b")`)
-    _, err = parseStructogram(tokens)
-    checkErrorMsg(t, err, "1:20, expected 'openBrace', but got 'EOF'")
+	tokens = makeTokens(`name("a") case("b")`)
+	_, err = parseStructogram(tokens)
+	checkErrorMsg(t, err, "1:20, expected 'openBrace', but got 'EOF'")
 
-    tokens = makeTokens(`name("a") case("b") {`)
-    _, err = parseStructogram(tokens)
-    checkErrorMsg(t, err, "1:22, expected 'keyword', but got 'EOF'")
+	tokens = makeTokens(`name("a") case("b") {`)
+	_, err = parseStructogram(tokens)
+	checkErrorMsg(t, err, "1:22, expected 'keyword', but got 'EOF'")
 
-    tokens = makeTokens(`name("a") case("b") { instruction("c")`)
-    _, err = parseStructogram(tokens)
-    checkErrorMsg(t, err, "1:39, expected 'closeBrace', but got 'EOF'")
+	tokens = makeTokens(`name("a") case("b") { instruction("c")`)
+	_, err = parseStructogram(tokens)
+	checkErrorMsg(t, err, "1:39, expected 'closeBrace', but got 'EOF'")
 
-    tokens = makeTokens(`name("a") case("b") {instruction("c")}`)
-    structogram, err := parseStructogram(tokens)
-    checkOk(t, err)
-    checkNodeCount(t, structogram.nodes, 1)
-    caseNode := structogram.nodes[0]
-    checkNode(t, caseNode, "case", "b")
-    caseBody := caseNode.nodes
-    checkNodeCount(t, caseBody, 1)
-    checkNode(t, caseBody[0], "instruction", "c")
+	tokens = makeTokens(`name("a") case("b") {instruction("c")}`)
+	structogram, err := parseStructogram(tokens)
+	checkOk(t, err)
+	checkNodeCount(t, structogram.nodes, 1)
+	caseNode := structogram.nodes[0]
+	checkNode(t, caseNode, "case", "b")
+	caseBody := caseNode.nodes
+	checkNodeCount(t, caseBody, 1)
+	checkNode(t, caseBody[0], "instruction", "c")
 }
