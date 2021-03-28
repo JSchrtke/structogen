@@ -86,6 +86,8 @@ func makeTokens(s string) []Token {
 			t.emitToken("switch")
 		case "default":
 			t.emitToken("default")
+        case "case":
+            t.emitToken("case")
 		case `"`, "'":
 			quot := string(t.runes)
 			str := ""

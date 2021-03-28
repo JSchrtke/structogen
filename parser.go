@@ -174,6 +174,12 @@ func (p *Parser) parseUntil(delimiter string) ([]Node, error) {
 			}
 
 			nodes = append(nodes, defaultNode)
+        case "case":
+            caseNode, err := p.parseConditional()
+            if err != nil {
+                return nodes, err
+            }
+            nodes = append(nodes, caseNode)
 		}
 	}
 	if p.next().tokenType != delimiter {
