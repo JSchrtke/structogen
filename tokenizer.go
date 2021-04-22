@@ -82,6 +82,8 @@ func makeTokens(s string) []Token {
 			t.emitToken("while")
 		case "dowhile":
 			t.emitToken("dowhile")
+		case "for":
+			t.emitToken("for")
 		case "switch":
 			t.emitToken("switch")
 		case "default":

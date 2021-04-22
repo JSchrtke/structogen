@@ -97,6 +97,8 @@ func (p *Parser) parseUntil(delimiter string) ([]Node, error) {
 			return nodes, newTokenTypeError(delimiter, p.next())
 		case "invalid":
 			return nodes, newTokenTypeError("keyword", p.next())
+		case "openParentheses":
+			return nodes, newTokenTypeError("keyword", p.next())
 		case "instruction", "call":
 			var n Node
 			n.nodeType = p.readNext().tokenType
@@ -123,7 +125,7 @@ func (p *Parser) parseUntil(delimiter string) ([]Node, error) {
 			}
 		case "else":
 			return nodes, newTokenTypeError("statement", p.next())
-		case "while", "dowhile":
+		case "while", "dowhile", "for":
 			conditionalNode, err := p.parseConditional()
 			if err != nil {
 				return nodes, err
