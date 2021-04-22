@@ -17,8 +17,10 @@ type Node struct {
 }
 
 type Parser struct {
-	tokenIndex int
-	tokens     []Token
+	tokenIndex     int
+	tokens         []Token
+	isInSwitchBody bool
+	isInCaseBody   bool
 }
 
 type Token struct {
@@ -140,6 +142,9 @@ func (p *Parser) parseUntil(delimiter string) ([]Node, error) {
 			}
 			nodes = append(nodes, switchNode)
 		case "default":
+			if p.isInSwitchBody {
+				return nodes, newTokenTypeError("keyword", p.next())
+			}
 			var defaultNode Node
 			defaultNode.nodeType = p.readNext().tokenType
 			defaultNode.value = ""
@@ -151,6 +156,9 @@ func (p *Parser) parseUntil(delimiter string) ([]Node, error) {
 
 			nodes = append(nodes, defaultNode)
 		case "case":
+			if p.isInCaseBody {
+				return nodes, newTokenTypeError("keyword", p.next())
+			}
 			caseNode, err := p.parseConditional()
 			if err != nil {
 				return nodes, err
@@ -183,18 +191,21 @@ func (p *Parser) parseBraces() ([]Node, error) {
 }
 
 func (p *Parser) parseSwitchBody() ([]Node, error) {
+	p.isInSwitchBody = true
 	var switchBody []Node
 	if p.next().tokenType != "openBrace" {
 		return switchBody, newTokenTypeError("openBrace", p.next())
 	}
 	p.readNext()
 	for p.next().tokenType == "case" {
+		p.isInCaseBody = true
 		caseNode, err := p.parseConditional()
 		if err != nil {
 			return switchBody, err
 		}
 		switchBody = append(switchBody, caseNode)
 	}
+	p.isInCaseBody = false
 	if p.next().tokenType != "default" {
 		return switchBody, newTokenTypeError("default", p.next())
 	}
@@ -211,6 +222,7 @@ func (p *Parser) parseSwitchBody() ([]Node, error) {
 	p.readNext()
 	defaultNode.nodes = defaultBody
 	switchBody = append(switchBody, defaultNode)
+	p.isInSwitchBody = false
 	return switchBody, nil
 }
 

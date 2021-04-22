@@ -560,3 +560,9 @@ func TestCanParseCase(t *testing.T) {
 	checkNodeCount(t, caseBody, 1)
 	checkNode(t, caseBody[0], "instruction", "c")
 }
+
+func TestMissingClosingBraceAfterCaseInsideSwitchBody(t *testing.T) {
+	tokens := makeTokens(`name("a") switch("b") { case("c") { instruction("d") default {instruction("e")}}`)
+	_, err := parseStructogram(tokens)
+	checkErrorMsg(t, err, "1:54, expected 'keyword', but got 'default'")
+}
