@@ -1,19 +1,20 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 )
 
 type Structogram struct {
-	name  string
-	nodes []Node
+	Name  string
+	Nodes []Node
 }
 
 type Node struct {
-	nodeType string
-	value    string
-	nodes    []Node
+	NodeType string
+	Value    string
+	Nodes    []Node
 }
 
 type Parser struct {
@@ -28,6 +29,14 @@ type Token struct {
 	value     string
 	line      int
 	column    int
+}
+
+func (s *Structogram) ToJSON() (string, error) {
+	j, err := json.MarshalIndent(s, "", "    ")
+	if err != nil {
+		return "", err
+	}
+	return string(j), nil
 }
 
 func parseStructogram(tokens []Token) (Structogram, error) {
@@ -49,13 +58,13 @@ func parseStructogram(tokens []Token) (Structogram, error) {
 		return parsed, newTokenTypeError("name", p.next())
 	}
 	_ = p.readNext()
-	parsed.name, err = p.parseParentheses()
+	parsed.Name, err = p.parseParentheses()
 	if err != nil {
 		return parsed, err
 	}
 
 	nodes, err := p.parseUntil("EOF")
-	parsed.nodes = nodes
+	parsed.Nodes = nodes
 	return parsed, err
 }
 
@@ -101,9 +110,9 @@ func (p *Parser) parseUntil(delimiter string) ([]Node, error) {
 			return nodes, newTokenTypeError("keyword", p.next())
 		case "instruction", "call":
 			var n Node
-			n.nodeType = p.readNext().tokenType
+			n.NodeType = p.readNext().tokenType
 
-			n.value, err = p.parseParentheses()
+			n.Value, err = p.parseParentheses()
 			if err != nil {
 				return nodes, err
 			}
@@ -133,12 +142,12 @@ func (p *Parser) parseUntil(delimiter string) ([]Node, error) {
 			nodes = append(nodes, conditionalNode)
 		case "switch":
 			switchNode := Node{}
-			switchNode.nodeType = p.readNext().tokenType
-			switchNode.value, err = p.parseParentheses()
+			switchNode.NodeType = p.readNext().tokenType
+			switchNode.Value, err = p.parseParentheses()
 			if err != nil {
 				return nodes, err
 			}
-			switchNode.nodes, err = p.parseSwitchBody()
+			switchNode.Nodes, err = p.parseSwitchBody()
 			if err != nil {
 				return nodes, err
 			}
@@ -148,10 +157,10 @@ func (p *Parser) parseUntil(delimiter string) ([]Node, error) {
 				return nodes, newTokenTypeError("keyword", p.next())
 			}
 			var defaultNode Node
-			defaultNode.nodeType = p.readNext().tokenType
-			defaultNode.value = ""
+			defaultNode.NodeType = p.readNext().tokenType
+			defaultNode.Value = ""
 
-			defaultNode.nodes, err = p.parseBraces()
+			defaultNode.Nodes, err = p.parseBraces()
 			if err != nil {
 				return nodes, err
 			}
@@ -212,8 +221,8 @@ func (p *Parser) parseSwitchBody() ([]Node, error) {
 		return switchBody, newTokenTypeError("default", p.next())
 	}
 	var defaultNode Node
-	defaultNode.nodeType = p.readNext().tokenType
-	defaultNode.value = ""
+	defaultNode.NodeType = p.readNext().tokenType
+	defaultNode.Value = ""
 	defaultBody, err := p.parseBraces()
 	if err != nil {
 		return switchBody, err
@@ -222,7 +231,7 @@ func (p *Parser) parseSwitchBody() ([]Node, error) {
 		return switchBody, newTokenTypeError("closeBrace", p.next())
 	}
 	p.readNext()
-	defaultNode.nodes = defaultBody
+	defaultNode.Nodes = defaultBody
 	switchBody = append(switchBody, defaultNode)
 	p.isInSwitchBody = false
 	return switchBody, nil
@@ -231,26 +240,26 @@ func (p *Parser) parseSwitchBody() ([]Node, error) {
 func (p *Parser) parseConditional() (Node, error) {
 	var node Node
 
-	node.nodeType = p.readNext().value
+	node.NodeType = p.readNext().value
 
 	v, err := p.parseParentheses()
-	node.value = v
+	node.Value = v
 	if err != nil {
 		return node, err
 	}
 
 	body, err := p.parseBraces()
-	node.nodes = body
+	node.Nodes = body
 	return node, err
 }
 
 func (p *Parser) parseElse() (Node, error) {
 	var elseNode Node
 
-	elseNode.nodeType = p.readNext().tokenType
+	elseNode.NodeType = p.readNext().tokenType
 
 	elseBody, err := p.parseBraces()
-	elseNode.nodes = elseBody
+	elseNode.Nodes = elseBody
 	return elseNode, err
 }
 

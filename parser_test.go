@@ -34,13 +34,13 @@ func checkNodeCount(t *testing.T, n []Node, count int) {
 
 func checkNode(t *testing.T, n Node, nodeType string, value string) {
 	t.Helper()
-	if n.nodeType != nodeType {
+	if n.NodeType != nodeType {
 		t.Errorf(
-			"Wrong node type, expected %s, but got %s", nodeType, n.nodeType,
+			"Wrong node type, expected %s, but got %s", nodeType, n.NodeType,
 		)
 	}
-	if n.value != value {
-		t.Errorf("Wrong node value, expected %s, but got %s", value, n.value)
+	if n.Value != value {
+		t.Errorf("Wrong node value, expected %s, but got %s", value, n.Value)
 	}
 }
 
@@ -55,10 +55,10 @@ func TestStructogramsHaveNames(t *testing.T) {
 	structogram, err := parseStructogram(tokens)
 	checkOk(t, err)
 
-	if structogram.name != "test name" {
+	if structogram.Name != "test name" {
 		t.Errorf(
 			"Diagram has wrong name, expected: %s, but was: %s",
-			"test name", structogram.name,
+			"test name", structogram.Name,
 		)
 	}
 }
@@ -115,17 +115,17 @@ func TestStructogramCanHaveInstructions(t *testing.T) {
 	tokens := makeTokens(`name("a")instruction("something")`)
 	structogram, err := parseStructogram(tokens)
 	checkOk(t, err)
-	checkNodeCount(t, structogram.nodes, 1)
-	checkNode(t, structogram.nodes[0], "instruction", "something")
+	checkNodeCount(t, structogram.Nodes, 1)
+	checkNode(t, structogram.Nodes[0], "instruction", "something")
 }
 
 func TestStructogramsCanHaveMultipleInstructions(t *testing.T) {
 	tokens := makeTokens(`name("a")instruction("b")instruction("c")`)
 	structogram, err := parseStructogram(tokens)
 	checkOk(t, err)
-	checkNodeCount(t, structogram.nodes, 2)
-	checkNode(t, structogram.nodes[0], "instruction", "b")
-	checkNode(t, structogram.nodes[1], "instruction", "c")
+	checkNodeCount(t, structogram.Nodes, 2)
+	checkNode(t, structogram.Nodes[0], "instruction", "b")
+	checkNode(t, structogram.Nodes[1], "instruction", "c")
 }
 
 func TestParserCanHandleInvalidTokens(t *testing.T) {
@@ -214,11 +214,11 @@ func TestCanParseMultipleInstructionsInsideIfBody(t *testing.T) {
 	structogram, err := parseStructogram(tokens)
 	checkOk(t, err)
 
-	checkNodeCount(t, structogram.nodes, 1)
-	ifNode := structogram.nodes[0]
+	checkNodeCount(t, structogram.Nodes, 1)
+	ifNode := structogram.Nodes[0]
 	checkNode(t, ifNode, "if", "b")
 
-	ifBody := ifNode.nodes
+	ifBody := ifNode.Nodes
 	checkNodeCount(t, ifBody, 2)
 	instructionNode := ifBody[0]
 	checkNode(t, instructionNode, "instruction", "c")
@@ -232,17 +232,17 @@ func TestCanParseNestedIfs(t *testing.T) {
 	structogram, err := parseStructogram(tokens)
 	checkOk(t, err)
 
-	checkNodeCount(t, structogram.nodes, 1)
-	ifNode := structogram.nodes[0]
+	checkNodeCount(t, structogram.Nodes, 1)
+	ifNode := structogram.Nodes[0]
 	checkNode(t, ifNode, "if", "b")
 
-	ifBody := ifNode.nodes
+	ifBody := ifNode.Nodes
 	checkNodeCount(t, ifBody, 1)
 
 	nestedIf := ifBody[0]
 	checkNode(t, nestedIf, "if", "c")
 
-	nestedIfBody := nestedIf.nodes
+	nestedIfBody := nestedIf.Nodes
 	checkNodeCount(t, nestedIfBody, 1)
 	checkNode(t, nestedIfBody[0], "instruction", "d")
 }
@@ -260,13 +260,13 @@ func TestCanParseElse(t *testing.T) {
 	structogram, err := parseStructogram(tokens)
 	checkOk(t, err)
 
-	checkNodeCount(t, structogram.nodes, 2)
+	checkNodeCount(t, structogram.Nodes, 2)
 
-	elseNode := structogram.nodes[1]
+	elseNode := structogram.Nodes[1]
 	checkNode(t, elseNode, "else", "")
-	checkNodeCount(t, elseNode.nodes, 1)
+	checkNodeCount(t, elseNode.Nodes, 1)
 
-	elseBody := elseNode.nodes
+	elseBody := elseNode.Nodes
 	checkNodeCount(t, elseBody, 1)
 	checkNode(t, elseBody[0], "instruction", "d")
 }
@@ -288,8 +288,8 @@ func TestCanParseCall(t *testing.T) {
 	structogram, err := parseStructogram(tokens)
 	checkOk(t, err)
 
-	checkNodeCount(t, structogram.nodes, 1)
-	checkNode(t, structogram.nodes[0], "call", "b")
+	checkNodeCount(t, structogram.Nodes, 1)
+	checkNode(t, structogram.Nodes[0], "call", "b")
 }
 
 func TestCanParseCallInsideIfBody(t *testing.T) {
@@ -297,12 +297,12 @@ func TestCanParseCallInsideIfBody(t *testing.T) {
 	structogram, err := parseStructogram(tokens)
 	checkOk(t, err)
 
-	checkNodeCount(t, structogram.nodes, 1)
-	ifNode := structogram.nodes[0]
+	checkNodeCount(t, structogram.Nodes, 1)
+	ifNode := structogram.Nodes[0]
 	checkNode(t, ifNode, "if", "b")
 
-	checkNodeCount(t, ifNode.nodes, 1)
-	checkNode(t, ifNode.nodes[0], "call", "c")
+	checkNodeCount(t, ifNode.Nodes, 1)
+	checkNode(t, ifNode.Nodes[0], "call", "c")
 }
 
 func TestWhileHasToHaveCondition(t *testing.T) {
@@ -358,36 +358,36 @@ func TestCanParseWhileBody(t *testing.T) {
 	)
 	structogram, err := parseStructogram(tokens)
 	checkOk(t, err)
-	checkNodeCount(t, structogram.nodes, 1)
+	checkNodeCount(t, structogram.Nodes, 1)
 
-	whileNode := structogram.nodes[0]
+	whileNode := structogram.Nodes[0]
 	checkNode(t, whileNode, "while", "b")
-	whileBody := whileNode.nodes
+	whileBody := whileNode.Nodes
 	checkNodeCount(t, whileBody, 4)
 
 	instructionNode := whileBody[0]
 	checkNode(t, instructionNode, "instruction", "c")
-	checkNodeCount(t, instructionNode.nodes, 0)
+	checkNodeCount(t, instructionNode.Nodes, 0)
 
 	callNode := whileBody[1]
 	checkNode(t, callNode, "call", "d")
-	checkNodeCount(t, callNode.nodes, 0)
+	checkNodeCount(t, callNode.Nodes, 0)
 
 	ifNode := whileBody[2]
 	checkNode(t, ifNode, "if", "e")
-	ifBody := ifNode.nodes
+	ifBody := ifNode.Nodes
 	checkNodeCount(t, ifBody, 1)
 	instructionNode = ifBody[0]
 	checkNode(t, instructionNode, "instruction", "f")
-	checkNodeCount(t, instructionNode.nodes, 0)
+	checkNodeCount(t, instructionNode.Nodes, 0)
 
 	nestedWhileNode := whileBody[3]
 	checkNode(t, nestedWhileNode, "while", "g")
-	nestedWhileBody := nestedWhileNode.nodes
+	nestedWhileBody := nestedWhileNode.Nodes
 	checkNodeCount(t, nestedWhileBody, 1)
 	instructionNode = nestedWhileBody[0]
 	checkNode(t, instructionNode, "instruction", "h")
-	checkNodeCount(t, instructionNode.nodes, 0)
+	checkNodeCount(t, instructionNode.Nodes, 0)
 }
 
 func TestDoWhileHasToHaveCondition(t *testing.T) {
@@ -443,36 +443,36 @@ func TestCanParseDoWhileBody(t *testing.T) {
 	)
 	structogram, err := parseStructogram(tokens)
 	checkOk(t, err)
-	checkNodeCount(t, structogram.nodes, 1)
+	checkNodeCount(t, structogram.Nodes, 1)
 
-	doWhileNode := structogram.nodes[0]
+	doWhileNode := structogram.Nodes[0]
 	checkNode(t, doWhileNode, "dowhile", "b")
-	doWhileBody := doWhileNode.nodes
+	doWhileBody := doWhileNode.Nodes
 	checkNodeCount(t, doWhileBody, 4)
 
 	instructionNode := doWhileBody[0]
 	checkNode(t, instructionNode, "instruction", "c")
-	checkNodeCount(t, instructionNode.nodes, 0)
+	checkNodeCount(t, instructionNode.Nodes, 0)
 
 	callNode := doWhileBody[1]
 	checkNode(t, callNode, "call", "d")
-	checkNodeCount(t, callNode.nodes, 0)
+	checkNodeCount(t, callNode.Nodes, 0)
 
 	ifNode := doWhileBody[2]
 	checkNode(t, ifNode, "if", "e")
-	ifBody := ifNode.nodes
+	ifBody := ifNode.Nodes
 	checkNodeCount(t, ifBody, 1)
 	instructionNode = ifBody[0]
 	checkNode(t, instructionNode, "instruction", "f")
-	checkNodeCount(t, instructionNode.nodes, 0)
+	checkNodeCount(t, instructionNode.Nodes, 0)
 
 	nestedDoWhileNode := doWhileBody[3]
 	checkNode(t, nestedDoWhileNode, "dowhile", "g")
-	nestedDoWhileBody := nestedDoWhileNode.nodes
+	nestedDoWhileBody := nestedDoWhileNode.Nodes
 	checkNodeCount(t, nestedDoWhileBody, 1)
 	instructionNode = nestedDoWhileBody[0]
 	checkNode(t, instructionNode, "instruction", "h")
-	checkNodeCount(t, instructionNode.nodes, 0)
+	checkNodeCount(t, instructionNode.Nodes, 0)
 }
 
 func TestSwitchHasToHaveCondition(t *testing.T) {
@@ -507,16 +507,16 @@ func TestCanParseDefault(t *testing.T) {
 	checkOk(t, err)
 	_ = structogram
 
-	checkNodeCount(t, structogram.nodes, 1)
-	switchNode := structogram.nodes[0]
+	checkNodeCount(t, structogram.Nodes, 1)
+	switchNode := structogram.Nodes[0]
 	checkNode(t, switchNode, "switch", "b")
-	switchBody := switchNode.nodes
+	switchBody := switchNode.Nodes
 	checkNodeCount(t, switchBody, 1)
 	defaultNode := switchBody[0]
 	checkNode(t, defaultNode, "default", "")
-	defaultBody := defaultNode.nodes
+	defaultBody := defaultNode.Nodes
 	checkNodeCount(t, defaultBody, 1)
-	checkNode(t, defaultNode.nodes[0], "instruction", "b")
+	checkNode(t, defaultNode.Nodes[0], "instruction", "b")
 }
 
 func TestSwitchBodyHasToHaveDefaultCase(t *testing.T) {
@@ -553,10 +553,10 @@ func TestCanParseCase(t *testing.T) {
 	tokens = makeTokens(`name("a") case("b") {instruction("c")}`)
 	structogram, err := parseStructogram(tokens)
 	checkOk(t, err)
-	checkNodeCount(t, structogram.nodes, 1)
-	caseNode := structogram.nodes[0]
+	checkNodeCount(t, structogram.Nodes, 1)
+	caseNode := structogram.Nodes[0]
 	checkNode(t, caseNode, "case", "b")
-	caseBody := caseNode.nodes
+	caseBody := caseNode.Nodes
 	checkNodeCount(t, caseBody, 1)
 	checkNode(t, caseBody[0], "instruction", "c")
 }
