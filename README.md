@@ -16,3 +16,43 @@ json, run
 ```go
 go run .
 ```
+
+## Syntax
+Structogen can parse .str files. The entire syntax is documented in `template.str`
+
+```
+name("template name")
+
+instruction("counter = 0")
+
+for ("counter != 10") {
+    instruction("print counter")
+
+    if ("counter % 2 == 0") {
+        call("printEven()")
+    } else {
+        call("printOdd()")
+    }
+
+    instruction("counter++")
+
+    dowhile("counter < 5") {
+        switch("counter") {
+            case("1") {
+                instruction("printOne")
+            }
+            case("two") {
+                call("printTwo")
+            }
+            case("3") {
+                instruction("")
+            }
+            default {
+                instruction("printDefault")
+            }
+        }
+
+        instruction("counter++")
+    }
+}
+```
