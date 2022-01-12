@@ -13,7 +13,7 @@ As such, the only functionality provided at the moment is the generation of said
 To run the example program, which will read the included `template.str` and then display the tree as
 json, run
 
-```go
+```
 go run .
 ```
 
@@ -55,4 +55,17 @@ for ("counter != 10") {
         instruction("counter++")
     }
 }
+```
+
+## Building and testing
+To build, run
+
+```
+go build
+```
+
+To run the tests, run
+
+```
+go test
 ```
